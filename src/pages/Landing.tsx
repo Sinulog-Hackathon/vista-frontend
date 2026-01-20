@@ -916,7 +916,7 @@ export function Landing() {
 
           <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 md:flex-row md:pt-8">
             <p className="text-xs text-white/50 md:text-sm">
-              © 2024 Vista. All rights reserved.
+              © 2026 Vista. All rights reserved.
             </p>
             <div className="flex gap-4 md:gap-6">
               <a
