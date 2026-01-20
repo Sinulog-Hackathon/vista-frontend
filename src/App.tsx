@@ -1,6 +1,6 @@
 function App() {
   return (
-    <div className="h-screen w-screen flex items-center justify-center border-2">
+    <div className="h-screen w-screen flex items-center justify-center">
       Hello, Cebu!
     </div>
   );
