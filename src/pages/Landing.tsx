@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef, useState, useCallback, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   Mic,
   Layers,
@@ -10,13 +10,77 @@ import {
   MessageCircle,
   Bot,
 } from "lucide-react";
+import emptyRoomImg from "../assets/landing/empty_room.png";
+import furnishedRoomImg from "../assets/landing/non_empty_room.png";
+
 export function Landing() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-  const rotate = useTransform(scrollYProgress, [0, 0.25], [0, 15]);
+  const sliderContainerRef = useRef<HTMLDivElement>(null);
+  const [sliderPosition, setSliderPosition] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const [containerWidth, setContainerWidth] = useState<number | null>(null);
+
+  // Update container width on mount and resize
+  useEffect(() => {
+    const updateWidth = () => {
+      if (sliderContainerRef.current) {
+        setContainerWidth(sliderContainerRef.current.offsetWidth);
+      }
+    };
+
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
+  const calculatePosition = useCallback((clientX: number) => {
+    if (!sliderContainerRef.current) return;
+    const rect = sliderContainerRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPosition(percentage);
+  }, []);
+
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      setIsDragging(true);
+      calculatePosition(e.clientX);
+    },
+    [calculatePosition]
+  );
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isDragging) return;
+      calculatePosition(e.clientX);
+    },
+    [isDragging, calculatePosition]
+  );
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      setIsDragging(true);
+      calculatePosition(e.touches[0].clientX);
+    },
+    [calculatePosition]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isDragging) return;
+      calculatePosition(e.touches[0].clientX);
+    },
+    [isDragging, calculatePosition]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
   const furnitureItems = [
     {
       name: "Wooden Chair",
@@ -182,118 +246,141 @@ export function Landing() {
             </motion.button>
           </motion.div>
 
-          <div className="sm:h-100h-[500px] relative flex h-87.5 items-center justify-center">
-            {/* Floating UI Elements */}
-            <motion.div
-              className="shadow-glass absolute -top-4 -right-4 z-20 rounded-xl border border-white/50 bg-white/80 p-2 backdrop-blur-md sm:-top-2 sm:right-0 sm:p-3 md:top-4 md:right-4 md:p-4"
-              initial={{
-                opacity: 0,
-                y: -20,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                delay: 0.4,
-                duration: 0.6,
-              }}
-            >
-              <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500 sm:h-2 sm:w-2" />
-                <span className="text-vista-primary text-xs font-medium sm:text-sm md:text-base">
-                  Echo Active
-                </span>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="shadow-glass absolute -bottom-4 -left-4 z-20 rounded-xl border border-white/50 bg-white/80 p-2 backdrop-blur-md sm:-bottom-2 sm:left-0 sm:p-3 md:bottom-4 md:left-4 md:p-4"
-              initial={{
-                opacity: 0,
-                y: 20,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                delay: 0.6,
-                duration: 0.6,
-              }}
-            >
-              <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
-                <div className="bg-vista-accent/20 rounded-lg p-1 sm:p-1.5 md:p-2">
-                  <DollarSign className="text-vista-accent h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
+          <motion.div
+            initial={{
+              opacity: 0,
+              x: 50,
+            }}
+            animate={{
+              opacity: 1,
+              x: 0,
+            }}
+            transition={{
+              duration: 0.8,
+              ease: "easeOut",
+            }}
+            className="relative"
+          >
+            <div className="relative h-[350px] w-full overflow-hidden rounded-3xl shadow-2xl sm:h-[400px] md:h-[500px]">
+              {/* Before/After Container */}
+              <div
+                ref={sliderContainerRef}
+                className="group relative h-full w-full select-none"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                {/* After Image (Furnished - Full Width Background) */}
+                <div className="absolute inset-0 h-full w-full overflow-hidden bg-gray-100">
+                  <img
+                    src={furnishedRoomImg}
+                    alt="Room After - Furnished"
+                    className="pointer-events-none h-full w-full object-cover"
+                    draggable={false}
+                  />
                 </div>
-                <div>
-                  <div className="text-vista-text/60 text-[10px] sm:text-xs">
-                    Renovation Cost
-                  </div>
-                  <div className="text-vista-primary text-xs font-bold sm:text-sm md:text-base">
-                    Low Estimate
-                  </div>
-                </div>
-              </div>
-            </motion.div>
 
-            {/* VR Headset with Parallax */}
-            <motion.div
-              style={{
-                rotateY: rotate,
-              }}
-              className="relative aspect-square w-full max-w-md"
-            >
-              <div className="relative h-full w-full">
-                <img
-                  src="https://images.unsplash.com/photo-1622979135225-d2ba269fb1bd?auto=format&fit=crop&q=80&w=1000"
-                  alt="VR Headset"
-                  className="h-full w-full object-contain drop-shadow-2xl"
+                {/* Before Image (Empty - Clipped Overlay) */}
+                <div
+                  className="absolute inset-0 h-full overflow-hidden"
                   style={{
-                    filter: "drop-shadow(0 25px 50px rgba(36, 69, 81, 0.3))",
+                    width: `${sliderPosition}%`,
+                    transition: isDragging ? "none" : "width 0.1s ease-out",
+                  }}
+                >
+                  <img
+                    src={emptyRoomImg}
+                    alt="Room Before - Empty"
+                    className="pointer-events-none h-full object-cover"
+                    style={{
+                      width: containerWidth ? `${containerWidth}px` : "100vw",
+                      maxWidth: "none",
+                    }}
+                    draggable={false}
+                  />
+                </div>
+
+                {/* Slider Line */}
+                <div
+                  className="bg-vista-accent absolute top-0 bottom-0 z-10 w-1 cursor-col-resize shadow-lg"
+                  style={{
+                    left: `${sliderPosition}%`,
+                    transition: isDragging ? "none" : "left 0.1s ease-out",
                   }}
                 />
-                {/* Connection Lines */}
-                <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
-                  <motion.path
-                    d="M 300 150 L 380 80"
-                    stroke="#2fbfa1"
-                    strokeWidth="2"
-                    fill="none"
-                    initial={{
-                      pathLength: 0,
-                    }}
-                    animate={{
-                      pathLength: 1,
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      delay: 0.5,
-                    }}
-                  />
-                  <motion.circle cx="380" cy="80" r="4" fill="#2fbfa1" />
 
-                  <motion.path
-                    d="M 150 350 L 80 400"
-                    stroke="#2fbfa1"
-                    strokeWidth="2"
-                    fill="none"
-                    initial={{
-                      pathLength: 0,
-                    }}
-                    animate={{
-                      pathLength: 1,
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      delay: 0.7,
-                    }}
-                  />
-                  <motion.circle cx="80" cy="400" r="4" fill="#2fbfa1" />
-                </svg>
+                {/* Slider Handle */}
+                <div
+                  className="absolute top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 cursor-col-resize"
+                  style={{
+                    left: `${sliderPosition}%`,
+                    transition: isDragging ? "none" : "left 0.1s ease-out",
+                  }}
+                >
+                  <div className="bg-vista-accent flex h-10 w-10 items-center justify-center rounded-full shadow-xl transition-transform hover:scale-110 md:h-12 md:w-12">
+                    <svg
+                      className="h-5 w-5 text-white md:h-6 md:w-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 19l-7-7 7-7"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 19l7-7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Labels */}
+                <motion.div
+                  className="absolute top-4 left-4 z-20 rounded-lg bg-black/60 px-3 py-1 backdrop-blur-sm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <span className="text-xs font-bold text-white md:text-sm">
+                    Before
+                  </span>
+                </motion.div>
+
+                <motion.div
+                  className="bg-vista-accent/90 absolute top-4 right-4 z-20 rounded-lg px-3 py-1 backdrop-blur-sm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <span className="text-xs font-bold text-white md:text-sm">
+                    After
+                  </span>
+                </motion.div>
+
+                {/* Drag hint */}
+                <motion.div
+                  className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/50 px-4 py-2 backdrop-blur-sm"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  <span className="text-xs font-medium text-white">
+                    ← Drag to compare →
+                  </span>
+                </motion.div>
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -328,11 +415,6 @@ export function Landing() {
                 className="h-full w-full object-cover"
               />
               <div className="from-vista-primary/20 absolute inset-0 bg-linear-to-r to-transparent" />
-              <div className="absolute bottom-4 left-4 rounded-lg bg-white/90 px-3 py-1.5 shadow-lg backdrop-blur md:bottom-6 md:left-6 md:px-4 md:py-2">
-                <span className="text-vista-primary text-xs font-bold md:text-sm">
-                  Before / After
-                </span>
-              </div>
             </div>
           </motion.div>
 
