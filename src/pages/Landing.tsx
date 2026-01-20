@@ -51,15 +51,15 @@ export function Landing() {
   const chatMessages = [
     {
       type: "user",
-      text: "Is this area flood-safe?",
+      text: "When was this property built?",
     },
     {
       type: "mark",
-      text: "Yes, this property is in Zone X (Low Risk). The drainage system was upgraded in 2024.",
+      text: "This property was built in 2015 and has had several renovations since then.",
     },
     {
       type: "user",
-      text: "What schools are nearby?",
+      text: "What are the property taxes like in this area?",
     },
   ];
   return (
@@ -648,6 +648,36 @@ export function Landing() {
           <motion.div
             initial={{
               opacity: 0,
+              x: 50,
+            }}
+            whileInView={{
+              opacity: 1,
+              x: 0,
+            }}
+            viewport={{
+              once: true,
+              amount: 0.5,
+            }}
+            transition={{
+              duration: 0.6,
+            }}
+            className="order-2 md:order-1"
+          >
+            <div className="bg-vista-accent/10 text-vista-accent mb-4 flex h-10 w-10 items-center justify-center rounded-xl md:mb-6 md:h-12 md:w-12">
+              <DollarSign className="h-5 w-5 md:h-6 md:w-6" />
+            </div>
+            <h2 className="text-vista-primary mb-3 text-3xl font-bold md:mb-4 md:text-4xl lg:text-5xl">
+              Know the Cost Before You Commit
+            </h2>
+            <p className="text-vista-text/70 text-base leading-relaxed md:text-lg">
+              As you customize interiors, Vista automatically estimates
+              furniture prices based on real online listings. Validate your
+              ideas before committing.
+            </p>
+          </motion.div>
+          <motion.div
+            initial={{
+              opacity: 0,
               y: 50,
             }}
             whileInView={{
@@ -661,7 +691,7 @@ export function Landing() {
             transition={{
               duration: 0.6,
             }}
-            className="order-2 flex justify-center md:order-1"
+            className="order-1 flex justify-center md:order-2"
           >
             <div className="shadow-soft border-vista-surface relative w-full max-w-md rounded-2xl border bg-white p-6 md:p-8">
               <div className="mb-4 flex items-center gap-3 border-b border-gray-100 pb-3 md:mb-6 md:pb-4">
@@ -715,37 +745,6 @@ export function Landing() {
                 View Full Breakdown
               </button>
             </div>
-          </motion.div>
-
-          <motion.div
-            initial={{
-              opacity: 0,
-              x: 50,
-            }}
-            whileInView={{
-              opacity: 1,
-              x: 0,
-            }}
-            viewport={{
-              once: true,
-              amount: 0.5,
-            }}
-            transition={{
-              duration: 0.6,
-            }}
-            className="order-1 md:order-2"
-          >
-            <div className="bg-vista-accent/10 text-vista-accent mb-4 flex h-10 w-10 items-center justify-center rounded-xl md:mb-6 md:h-12 md:w-12">
-              <DollarSign className="h-5 w-5 md:h-6 md:w-6" />
-            </div>
-            <h2 className="text-vista-primary mb-3 text-3xl font-bold md:mb-4 md:text-4xl lg:text-5xl">
-              Know the Cost Before You Commit
-            </h2>
-            <p className="text-vista-text/70 text-base leading-relaxed md:text-lg">
-              As you customize interiors, Vista automatically estimates
-              furniture prices based on real online listings. Validate your
-              ideas before committing.
-            </p>
           </motion.div>
         </div>
       </section>
