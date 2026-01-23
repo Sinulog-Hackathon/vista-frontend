@@ -1,8 +1,9 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Wand2, Loader2, CheckCircle, X } from "lucide-react";
 import { type Property } from "../types/property";
 import { useState, useEffect } from "react";
 import { PanoramaViewer } from "../components/PanoramaViewer";
+import { virtualStagingService, type VirtualStagingSession, type GenerateStagingRequest, type GenerateStagingResponse } from "../services/virtualStagingService";
 
 export default function VRViewerPage() {
   const navigate = useNavigate();
@@ -13,6 +14,53 @@ export default function VRViewerPage() {
   const [showUI, setShowUI] = useState(true);
   const [uiTimeout, setUiTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [stagingSession, setStagingSession] = useState<VirtualStagingSession | null>(null);
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [showStagingOverlay, setShowStagingOverlay] = useState(false);
+  const [stagingPrompt, setStagingPrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationResult, setGenerationResult] = useState<GenerateStagingResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // API functions
+  const createStagingSession = async (propertyId: string, userId: string, roomName: string): Promise<VirtualStagingSession> => {
+    const response = await virtualStagingService.createSession({
+      property_id: propertyId,
+      user_id: userId,
+      room_name: roomName,
+      style: 'modern',
+      furniture_theme: 'minimalist',
+    });
+    return response.staging;
+  };
+
+  const generateStaging = async (request: GenerateStagingRequest): Promise<GenerateStagingResponse> => {
+    return virtualStagingService.generateStaging(request);
+  };
+
+  // Create session when component mounts
+  useEffect(() => {
+    const initializeSession = async () => {
+      if (!property) return;
+
+      try {
+        setIsCreatingSession(true);
+        setError(null);
+        const session = await createStagingSession(
+          property.id || property.propertyId,
+          'current-user', // TODO: Get from auth context
+          'Living Room' // Default room name
+        );
+        setStagingSession(session);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create staging session');
+      } finally {
+        setIsCreatingSession(false);
+      }
+    };
+
+    initializeSession();
+  }, [property]);
 
   useEffect(() => {
     const handleMouseMove = () => {
@@ -36,6 +84,29 @@ export default function VRViewerPage() {
       if (uiTimeout) clearTimeout(uiTimeout);
     };
   }, [uiTimeout]);
+
+  // Handle staging generation
+  const handleGenerateStaging = async () => {
+    if (!stagingSession || !stagingPrompt.trim()) return;
+
+    try {
+      setIsGenerating(true);
+      setError(null);
+      const result = await generateStaging({
+        session_id: stagingSession.session_id,
+        image_index: currentImageIndex,
+        custom_prompt: stagingPrompt,
+        user_message: stagingPrompt,
+      });
+      setGenerationResult(result);
+      setStagingPrompt("");
+      setShowStagingOverlay(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate staging');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   if (!property) {
     return (
@@ -112,9 +183,19 @@ export default function VRViewerPage() {
               <p className="text-white/70 text-sm">
                 {panoramicImages.length} panoramic view
                 {panoramicImages.length !== 1 ? "s" : ""} available
+                {stagingSession && " • Virtual Staging Ready"}
               </p>
             </div>
           </div>
+          {stagingSession && (
+            <button
+              onClick={() => setShowStagingOverlay(true)}
+              className="bg-vista-accent hover:bg-vista-accent/80 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <Wand2 size={18} />
+              Virtual Staging
+            </button>
+          )}
         </div>
       </div>
 
@@ -153,6 +234,118 @@ export default function VRViewerPage() {
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Virtual Staging Overlay */}
+      {showStagingOverlay && (
+        <div className="absolute inset-0 z-30 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-vista-primary text-xl font-bold">
+                Virtual Staging
+              </h3>
+              <button
+                onClick={() => setShowStagingOverlay(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-vista-text/70 text-sm mb-2">
+                Describe the changes you want to make to this panoramic view:
+              </p>
+              <textarea
+                value={stagingPrompt}
+                onChange={(e) => setStagingPrompt(e.target.value)}
+                placeholder="e.g., Add modern furniture, warm lighting, and contemporary decor..."
+                className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-vista-accent"
+                disabled={isGenerating}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleGenerateStaging}
+                disabled={!stagingPrompt.trim() || isGenerating}
+                className="flex-1 bg-vista-accent hover:bg-vista-accent/90 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 size={18} />
+                    Generate Staging
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => setShowStagingOverlay(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                disabled={isGenerating}
+              >
+                Cancel
+              </button>
+            </div>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Generation Result Overlay */}
+      {generationResult && (
+        <div className="absolute inset-0 z-30 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <CheckCircle className="text-green-500" size={24} />
+              <h3 className="text-vista-primary text-xl font-bold">
+                Staging Generated!
+              </h3>
+            </div>
+
+            <p className="text-vista-text/70 text-sm mb-4">
+              Your virtual staging has been created successfully.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setGenerationResult(null);
+                  // TODO: Navigate to view the staged image
+                }}
+                className="flex-1 bg-vista-accent hover:bg-vista-accent/90 text-white py-2 px-4 rounded-lg transition-colors"
+              >
+                View Result
+              </button>
+              <button
+                onClick={() => setGenerationResult(null)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      {isCreatingSession && (
+        <div className="absolute inset-0 z-30 bg-black/80 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-6 text-center">
+            <Loader2 size={24} className="animate-spin mx-auto mb-2 text-vista-accent" />
+            <p className="text-vista-primary font-medium">Initializing Virtual Staging...</p>
+            <p className="text-vista-text/70 text-sm mt-1">Setting up your session</p>
           </div>
         </div>
       )}
