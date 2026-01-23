@@ -253,7 +253,7 @@ export function PropertyDetailsPanoramicViews({
         </h2>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate(`/vr-viewer/${property.id}`)}
+            onClick={() => navigate(`/vr-viewer/${property.id || property.propertyId}`, { state: { property } })}
             className="bg-vista-accent/10 hover:bg-vista-accent/20 text-vista-accent flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
           >
             <Headphones size={18} />
