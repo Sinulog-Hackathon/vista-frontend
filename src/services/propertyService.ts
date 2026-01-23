@@ -4,7 +4,8 @@ import type {
   SellerPropertiesResponse,
 } from "../types/property";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL =
+  "https://vista-sinulog-api-git-main-roginandds-projects.vercel.app/api";
 
 // Fields that your Python service passes to `_parse_json_array`
 const JSON_FIELDS = [
