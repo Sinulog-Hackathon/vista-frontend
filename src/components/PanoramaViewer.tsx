@@ -76,6 +76,7 @@ function DeviceOrientationController() {
   const { camera } = useThree();
   const orientationData = useRef({ alpha: 0, beta: 0, gamma: 0 });
   const initialAlpha = useRef<number | null>(null);
+  const initialGamma = useRef<number | null>(null);
   const hasReceivedEvent = useRef(false);
 
   useEffect(() => {
@@ -99,10 +100,15 @@ function DeviceOrientationController() {
         initialAlpha.current = event.alpha;
       }
       
+      // Store initial gamma to calibrate eye level
+      if (initialGamma.current === null) {
+        initialGamma.current = event.gamma;
+      }
+      
       orientationData.current = {
         alpha: event.alpha - (initialAlpha.current || 0),
         beta: event.beta,
-        gamma: event.gamma
+        gamma: event.gamma - (initialGamma.current || 0)
       };
     };
 
@@ -139,16 +145,24 @@ function DeviceOrientationController() {
   }, []);
 
   useFrame(() => {
-    const { alpha, beta, gamma } = orientationData.current;
+    const { alpha, gamma } = orientationData.current;
     
     // Convert to radians
     const alphaRad = THREE.MathUtils.degToRad(alpha);
-    const betaRad = THREE.MathUtils.degToRad(beta);
     const gammaRad = THREE.MathUtils.degToRad(gamma);
     
-    // For landscape orientation (phone held horizontally)
+    // For VR box in landscape mode (phone horizontal):
+    // - alpha (compass) controls left/right head turns (yaw)
+    // - gamma controls up/down head nods (pitch) - when phone is horizontal
+    
+    // Use gamma for pitch (nodding up/down)
+    // Clamp to prevent flipping at extremes
+    const pitch = THREE.MathUtils.clamp(-gammaRad, -Math.PI / 3, Math.PI / 3);
+    const yaw = alphaRad;
+    const roll = 0; // Ignore roll for cleaner VR experience
+    
     const euler = new THREE.Euler();
-    euler.set(betaRad - Math.PI / 2, alphaRad, -gammaRad, 'YXZ');
+    euler.set(pitch, yaw, roll, 'YXZ');
     camera.quaternion.setFromEuler(euler);
   });
 
