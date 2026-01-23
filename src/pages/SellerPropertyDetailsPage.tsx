@@ -17,6 +17,7 @@ import {
   PropertyDetailsAgent,
   PropertyDetailsDeveloper,
   PropertyDetailsActions,
+  PropertyDetailsPanoramicViews,
 } from "../components/sections/seller/propertyDetails";
 import { propertyDatabase, type Property } from "../data/properties";
 
@@ -76,6 +77,8 @@ export default function PropertyDetailsPage() {
                 }}
                 onUpdate={handlePropertyUpdate}
               />
+
+              <PropertyDetailsPanoramicViews property={property} onUpdate={handlePropertyUpdate} />
 
               <PropertyDetailsAbout property={property} onUpdate={handlePropertyUpdate} />
               
