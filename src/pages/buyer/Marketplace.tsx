@@ -1,5 +1,12 @@
-import { useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRef, useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  User,
+  Settings,
+  LogOut,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { MarketplaceSearch } from "../../features/buyer/components/MarketplaceSearch";
 import { PropertyCard } from "../../features/buyer/components/PropertyCard";
 import type { Property } from "../../features/buyer/types/property.types";
@@ -218,6 +225,8 @@ const MOCK_PROPERTIES: Property[] = [
 
 export default function Marketplace() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const navigate = useNavigate();
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
@@ -232,12 +241,58 @@ export default function Marketplace() {
     }
   };
 
+  const handleLogout = () => {
+    navigate("/get-started");
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* 1. Header Section */}
-      <div className="sticky top-0 z-30 w-full border-b border-gray-100 bg-white py-4 shadow-sm">
-        <div className="mx-auto px-4 md:px-8">
-          <MarketplaceSearch />
+      <div className="sticky top-0 z-30 w-full border-b border-gray-100 bg-white py-2 shadow-sm">
+        <div className="mx-auto flex items-center justify-between gap-4 px-4 md:px-8">
+          {/* Logo */}
+          <div className="flex items-center">
+            <h1 className="text-vista-primary font-display text-xl font-bold">
+              Vista.Buyer
+            </h1>
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex-1">
+            <MarketplaceSearch />
+          </div>
+
+          {/* Profile Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white transition-all hover:shadow-md"
+              aria-label="Profile menu"
+            >
+              <User className="h-5 w-5 text-gray-700" />
+            </button>
+
+            {showProfileDropdown && (
+              <div className="absolute top-12 right-0 w-56 rounded-lg border border-gray-200 bg-white shadow-lg">
+                <div className="py-2">
+                  <button
+                    className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                    onClick={() => setShowProfileDropdown(false)}
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Account Settings</span>
+                  </button>
+                  <button
+                    className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
