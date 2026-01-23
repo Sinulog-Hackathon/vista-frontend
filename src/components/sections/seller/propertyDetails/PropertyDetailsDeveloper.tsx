@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Globe, Phone, Mail } from "lucide-react";
+import { Globe, Phone, Mail, Star } from "lucide-react";
 import type { Property } from "../../../../types/property";
 
 interface PropertyDetailsDeveloperProps {

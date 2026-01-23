@@ -59,13 +59,7 @@ export function PropertyDetailsAvailability({
             </label>
             <input
               type="date"
-              value={
-                formData.availabilityDate
-                  ? new Date(formData.availabilityDate)
-                      .toISOString()
-                      .split("T")[0]
-                  : ""
-              }
+              value={formattedDate}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
