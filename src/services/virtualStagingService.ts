@@ -123,7 +123,7 @@ export interface ChatHistoryResponse {
   }>;
 }
 
-const API_BASE_URL = '/api/staging';
+const API_BASE_URL = "/api/staging";
 
 class VirtualStagingService {
   private async makeRequest<T>(
@@ -134,7 +134,7 @@ class VirtualStagingService {
 
     const response = await fetch(url, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -142,7 +142,9 @@ class VirtualStagingService {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Request failed: ${response.statusText}`);
+      throw new Error(
+        errorData.error || `Request failed: ${response.statusText}`
+      );
     }
 
     return response.json();
@@ -155,20 +157,24 @@ class VirtualStagingService {
     const url = `${API_BASE_URL}${endpoint}`;
 
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       body: formData,
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Request failed: ${response.statusText}`);
+      throw new Error(
+        errorData.error || `Request failed: ${response.statusText}`
+      );
     }
 
     return response.json();
   }
 
   // Session Management
-  async createSession(request: CreateSessionRequest): Promise<CreateSessionResponse> {
+  async createSession(
+    request: CreateSessionRequest
+  ): Promise<CreateSessionResponse> {
     const formData = new FormData();
 
     Object.entries(request).forEach(([key, value]) => {
@@ -177,15 +183,19 @@ class VirtualStagingService {
       }
     });
 
-    return this.makeFormRequest<CreateSessionResponse>('/session', formData);
+    return this.makeFormRequest<CreateSessionResponse>("/session", formData);
   }
 
-  async getSession(sessionId: string): Promise<{ message: string; session: VirtualStagingSession }> {
+  async getSession(
+    sessionId: string
+  ): Promise<{ message: string; session: VirtualStagingSession }> {
     return this.makeRequest(`/session/${sessionId}`);
   }
 
   // Virtual Staging Generation
-  async generateStaging(request: GenerateStagingRequest): Promise<GenerateStagingResponse> {
+  async generateStaging(
+    request: GenerateStagingRequest
+  ): Promise<GenerateStagingResponse> {
     const formData = new FormData();
 
     Object.entries(request).forEach(([key, value]) => {
@@ -198,20 +208,22 @@ class VirtualStagingService {
       }
     });
 
-    return this.makeFormRequest<GenerateStagingResponse>('/generate', formData);
+    return this.makeFormRequest<GenerateStagingResponse>("/generate", formData);
   }
 
   // Version Management
   async saveChanges(request: SaveChangeRequest): Promise<SaveChangeResponse> {
-    return this.makeRequest('/save-change', {
-      method: 'POST',
+    return this.makeRequest("/save-change", {
+      method: "POST",
       body: JSON.stringify(request),
     });
   }
 
-  async revertChanges(request: RevertChangeRequest): Promise<RevertChangeResponse> {
-    return this.makeRequest('/revert-change', {
-      method: 'POST',
+  async revertChanges(
+    request: RevertChangeRequest
+  ): Promise<RevertChangeResponse> {
+    return this.makeRequest("/revert-change", {
+      method: "POST",
       body: JSON.stringify(request),
     });
   }
