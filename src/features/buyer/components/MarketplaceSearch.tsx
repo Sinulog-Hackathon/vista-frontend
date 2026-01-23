@@ -12,9 +12,10 @@ export interface PropertyFilters {
 
 interface MarketplaceSearchProps {
   onSearch?: (filters: PropertyFilters) => void;
+  isMobile?: boolean;
 }
 
-export function MarketplaceSearch({ onSearch }: MarketplaceSearchProps) {
+export function MarketplaceSearch({ onSearch, isMobile = false }: MarketplaceSearchProps) {
   const [location, setLocation] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [priceRange, setPriceRange] = useState("");
@@ -32,6 +33,7 @@ export function MarketplaceSearch({ onSearch }: MarketplaceSearchProps) {
     "Consolacion",
   ];
   const propertyTypes = ["House", "Condo", "Townhouse", "Apartment"];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const priceRanges = [
     { label: "Under ₱5M", min: 0, max: 5000000 },
     { label: "₱5M - ₱10M", min: 5000000, max: 10000000 },
@@ -78,6 +80,241 @@ export function MarketplaceSearch({ onSearch }: MarketplaceSearchProps) {
     setBedrooms("");
   };
 
+  // Mobile layout
+  if (isMobile) {
+    return (
+      <div className="flex flex-col gap-4">
+        {/* Location */}
+        <div className="relative">
+          <label className="mb-1 block text-xs font-semibold text-gray-800">
+            Location
+          </label>
+          <button
+            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-left text-sm text-gray-700"
+            onClick={() => {
+              setShowLocationDropdown(!showLocationDropdown);
+              setShowTypeDropdown(false);
+              setShowPriceDropdown(false);
+              setShowBedroomsDropdown(false);
+            }}
+          >
+            {location || "Select location"}
+          </button>
+          <AnimatePresence>
+            {showLocationDropdown && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full left-0 z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg"
+              >
+                <div className="max-h-48 overflow-y-auto p-2">
+                  <button
+                    className="w-full rounded px-3 py-2 text-left text-sm font-semibold text-gray-600 hover:bg-gray-100"
+                    onClick={() => {
+                      setLocation("");
+                      setShowLocationDropdown(false);
+                    }}
+                  >
+                    All Locations
+                  </button>
+                  {locations.map((loc) => (
+                    <button
+                      key={loc}
+                      className="w-full rounded px-3 py-2 text-left text-sm hover:bg-gray-100"
+                      onClick={() => {
+                        setLocation(loc);
+                        setShowLocationDropdown(false);
+                      }}
+                    >
+                      {loc}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Property Type */}
+        <div className="relative">
+          <label className="mb-1 block text-xs font-semibold text-gray-800">
+            Property Type
+          </label>
+          <button
+            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-left text-sm text-gray-700"
+            onClick={() => {
+              setShowTypeDropdown(!showTypeDropdown);
+              setShowLocationDropdown(false);
+              setShowPriceDropdown(false);
+              setShowBedroomsDropdown(false);
+            }}
+          >
+            {propertyType || "Select type"}
+          </button>
+          <AnimatePresence>
+            {showTypeDropdown && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full left-0 z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg"
+              >
+                <div className="max-h-48 overflow-y-auto p-2">
+                  <button
+                    className="w-full rounded px-3 py-2 text-left text-sm font-semibold text-gray-600 hover:bg-gray-100"
+                    onClick={() => {
+                      setPropertyType("");
+                      setShowTypeDropdown(false);
+                    }}
+                  >
+                    All Types
+                  </button>
+                  {propertyTypes.map((type) => (
+                    <button
+                      key={type}
+                      className="w-full rounded px-3 py-2 text-left text-sm hover:bg-gray-100"
+                      onClick={() => {
+                        setPropertyType(type);
+                        setShowTypeDropdown(false);
+                      }}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Price Range */}
+        <div className="relative">
+          <label className="mb-1 block text-xs font-semibold text-gray-800">
+            Price Range
+          </label>
+          <button
+            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-left text-sm text-gray-700"
+            onClick={() => {
+              setShowPriceDropdown(!showPriceDropdown);
+              setShowLocationDropdown(false);
+              setShowTypeDropdown(false);
+              setShowBedroomsDropdown(false);
+            }}
+          >
+            {priceRange || "Select price range"}
+          </button>
+          <AnimatePresence>
+            {showPriceDropdown && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full left-0 z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg"
+              >
+                <div className="max-h-48 overflow-y-auto p-2">
+                  <button
+                    className="w-full rounded px-3 py-2 text-left text-sm font-semibold text-gray-600 hover:bg-gray-100"
+                    onClick={() => {
+                      setPriceRange("");
+                      setShowPriceDropdown(false);
+                    }}
+                  >
+                    Any Price
+                  </button>
+                  {priceRanges.map((range) => (
+                    <button
+                      key={range.label}
+                      className="w-full rounded px-3 py-2 text-left text-sm hover:bg-gray-100"
+                      onClick={() => {
+                        setPriceRange(range.label);
+                        setShowPriceDropdown(false);
+                      }}
+                    >
+                      {range.label}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Bedrooms */}
+        <div className="relative">
+          <label className="mb-1 block text-xs font-semibold text-gray-800">
+            Bedrooms
+          </label>
+          <button
+            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-left text-sm text-gray-700"
+            onClick={() => {
+              setShowBedroomsDropdown(!showBedroomsDropdown);
+              setShowLocationDropdown(false);
+              setShowTypeDropdown(false);
+              setShowPriceDropdown(false);
+            }}
+          >
+            {bedrooms ? `${bedrooms} Bedroom${bedrooms !== "1" ? "s" : ""}` : "Any"}
+          </button>
+          <AnimatePresence>
+            {showBedroomsDropdown && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full left-0 z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg"
+              >
+                <div className="max-h-48 overflow-y-auto p-2">
+                  <button
+                    className="w-full rounded px-3 py-2 text-left text-sm font-semibold text-gray-600 hover:bg-gray-100"
+                    onClick={() => {
+                      setBedrooms("");
+                      setShowBedroomsDropdown(false);
+                    }}
+                  >
+                    Any Bedrooms
+                  </button>
+                  {bedroomOptions.map((bed) => (
+                    <button
+                      key={bed}
+                      className="w-full rounded px-3 py-2 text-left text-sm hover:bg-gray-100"
+                      onClick={() => {
+                        setBedrooms(bed);
+                        setShowBedroomsDropdown(false);
+                      }}
+                    >
+                      {bed} Bedroom{bed !== "1" ? "s" : ""}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-2 flex gap-3">
+          {hasActiveFilters && (
+            <button
+              onClick={clearAllFilters}
+              className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              Clear All
+            </button>
+          )}
+          <button
+            onClick={handleSearch}
+            className="bg-vista-primary flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-opacity-90"
+          >
+            <Search className="h-4 w-4" />
+            Search
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop layout
   return (
     <div className="shadow-soft relative mx-auto flex w-full max-w-4xl items-center rounded-full border border-gray-200 bg-white px-2 py-1 transition-shadow hover:shadow-md">
       {/* Location */}
@@ -307,7 +544,7 @@ export function MarketplaceSearch({ onSearch }: MarketplaceSearchProps) {
         {/* Search Button */}
         <button
           onClick={handleSearch}
-          className="bg-vista-primary hover:bg-opacity-90 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white transition-colors"
+          className="bg-vista-primary hover:bg-opacity-90 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-colors"
         >
           <Search className="h-4 w-4 font-bold" strokeWidth={3} />
         </button>
@@ -316,7 +553,7 @@ export function MarketplaceSearch({ onSearch }: MarketplaceSearchProps) {
         {hasActiveFilters && (
           <button
             onClick={clearAllFilters}
-            className="ml-2 flex-shrink-0 rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
+            className="ml-2 shrink-0 rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
           >
             Clear All
           </button>

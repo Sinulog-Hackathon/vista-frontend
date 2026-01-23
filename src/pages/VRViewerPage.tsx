@@ -1,14 +1,11 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { ChevronLeft, Wand2, Loader2, CheckCircle, X } from "lucide-react";
+import { ChevronLeft, RotateCcw } from "lucide-react";
 import { type Property } from "../types/property";
 import { useState, useEffect } from "react";
 import { PanoramaViewer } from "../components/PanoramaViewer";
-import {
-  virtualStagingService,
-  type VirtualStagingSession,
-  type GenerateStagingRequest,
-  type GenerateStagingResponse,
-} from "../services/virtualStagingService";
+
+const isMobileDevice = () =>
+  /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 export default function VRViewerPage() {
   const navigate = useNavigate();
@@ -21,65 +18,73 @@ export default function VRViewerPage() {
     typeof setTimeout
   > | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [stagingSession, setStagingSession] =
-    useState<VirtualStagingSession | null>(null);
-  const [isCreatingSession, setIsCreatingSession] = useState(false);
-  const [showStagingOverlay, setShowStagingOverlay] = useState(true);
-  const [stagingPrompt, setStagingPrompt] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationResult, setGenerationResult] =
-    useState<GenerateStagingResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [isPortrait, setIsPortrait] = useState(false);
+  const [orientationPermission, setOrientationPermission] = useState<
+    "granted" | "denied" | "prompt"
+  >("prompt");
 
-  // API functions
-  const createStagingSession = async (
-    propertyId: string,
-    userId: string,
-    roomName: string
-  ): Promise<VirtualStagingSession> => {
-    const response = await virtualStagingService.createSession({
-      property_id: propertyId,
-      user_id: userId,
-      room_name: roomName,
-      style: "modern",
-      furniture_theme: "minimalist",
-    });
-    return response.staging;
-  };
-
-  const generateStaging = async (
-    request: GenerateStagingRequest
-  ): Promise<GenerateStagingResponse> => {
-    return virtualStagingService.generateStaging(request);
-  };
-
-  // Create session when component mounts
+  // Lock to landscape on mobile and detect orientation
   useEffect(() => {
-    const initializeSession = async () => {
-      if (!property) return;
+    if (isMobileDevice()) {
+      // Try to lock screen orientation to landscape
+      const lockOrientation = async () => {
+        try {
+          const orientation = screen.orientation as any;
+          if (orientation && orientation.lock) {
+            await orientation.lock("landscape");
+            console.log("Screen locked to landscape");
+          }
+        } catch (err) {
+          console.log("Could not lock orientation:", err);
+        }
+      };
+      lockOrientation();
 
+      // Check current orientation
+      const checkOrientation = () => {
+        setIsPortrait(window.innerHeight > window.innerWidth);
+      };
+      checkOrientation();
+      window.addEventListener("resize", checkOrientation);
+      window.addEventListener("orientationchange", checkOrientation);
+
+      return () => {
+        // Unlock orientation when leaving
+        const orientation = screen.orientation as any;
+        if (orientation && orientation.unlock) {
+          orientation.unlock();
+        }
+        window.removeEventListener("resize", checkOrientation);
+        window.removeEventListener("orientationchange", checkOrientation);
+      };
+    }
+  }, []);
+
+  // Request device orientation permission (iOS 13+)
+  const requestOrientationPermission = async () => {
+    console.log("Requesting orientation permission...");
+
+    if (
+      typeof DeviceOrientationEvent !== "undefined" &&
+      typeof (DeviceOrientationEvent as any).requestPermission === "function"
+    ) {
       try {
-        setIsCreatingSession(true);
-        setError(null);
-        const session = await createStagingSession(
-          property.id || property.propertyId,
-          "current-user", // TODO: Get from auth context
-          "Living Room" // Default room name
-        );
-        setStagingSession(session);
+        console.log("iOS detected, requesting permission...");
+        const permission = await (
+          DeviceOrientationEvent as any
+        ).requestPermission();
+        console.log("Permission result:", permission);
+        setOrientationPermission(permission);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to create staging session"
-        );
-      } finally {
-        setIsCreatingSession(false);
+        console.error("Orientation permission error:", err);
+        setOrientationPermission("denied");
       }
-    };
-
-    initializeSession();
-  }, [property]);
+    } else {
+      // Non-iOS devices (Android) don't need permission
+      console.log("Non-iOS device, granting permission automatically");
+      setOrientationPermission("granted");
+    }
+  };
 
   useEffect(() => {
     const handleMouseMove = () => {
@@ -94,40 +99,25 @@ export default function VRViewerPage() {
       setShowUI(false);
     };
 
+    // Also show UI on touch for mobile
+    const handleTouchStart = () => {
+      setShowUI(true);
+      if (uiTimeout) clearTimeout(uiTimeout);
+      const timeout = setTimeout(() => setShowUI(false), 3000);
+      setUiTimeout(timeout);
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener("touchstart", handleTouchStart);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("touchstart", handleTouchStart);
       if (uiTimeout) clearTimeout(uiTimeout);
     };
   }, [uiTimeout]);
-
-  // Handle staging generation
-  const handleGenerateStaging = async () => {
-    if (!stagingSession || !stagingPrompt.trim()) return;
-
-    try {
-      setIsGenerating(true);
-      setError(null);
-      const result = await generateStaging({
-        session_id: stagingSession.session_id,
-        image_index: currentImageIndex,
-        custom_prompt: stagingPrompt,
-        user_message: stagingPrompt,
-      });
-      setGenerationResult(result);
-      setStagingPrompt("");
-      setShowStagingOverlay(false);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to generate staging"
-      );
-    } finally {
-      setIsGenerating(false);
-    }
-  };
 
   if (!property) {
     return (
@@ -172,12 +162,55 @@ export default function VRViewerPage() {
 
   return (
     <div className="fixed top-0 left-0 h-screen w-screen overflow-hidden bg-black">
+      {/* Portrait Mode Warning for Mobile */}
+      {isMobileDevice() && isPortrait && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-8 text-white">
+          <RotateCcw size={64} className="mb-6 animate-pulse" />
+          <h2 className="mb-2 text-center text-2xl font-bold">
+            Rotate Your Device
+          </h2>
+          <p className="mb-6 text-center text-white/70">
+            Please rotate your phone to landscape mode for the best VR
+            experience
+          </p>
+        </div>
+      )}
+
+      {/* iOS Permission Request */}
+      {isMobileDevice() &&
+        orientationPermission === "prompt" &&
+        !isPortrait && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 p-8 text-white">
+            <h2 className="mb-4 text-center text-2xl font-bold">
+              Enable Motion Controls
+            </h2>
+            <p className="mb-6 text-center text-white/70">
+              Allow device motion to look around by moving your phone
+            </p>
+            <button
+              onClick={requestOrientationPermission}
+              className="bg-vista-accent hover:bg-vista-accent/80 rounded-lg px-6 py-3 font-semibold text-white transition-colors"
+            >
+              Enable Motion Controls
+            </button>
+            <button
+              onClick={() => setOrientationPermission("denied")}
+              className="mt-4 text-white/50 transition-colors hover:text-white/70"
+            >
+              Skip (use touch instead)
+            </button>
+          </div>
+        )}
+
       {/* Three.js 360 Panorama Viewer - Fullscreen */}
       {panoramicImages.length > 0 && (
         <PanoramaViewer
           imageUrl={panoramicImages[currentImageIndex].url}
           width="100%"
           height="100%"
+          useDeviceOrientation={
+            isMobileDevice() && orientationPermission === "granted"
+          }
         />
       )}
       {panoramicImages.length === 0 && (
@@ -207,19 +240,9 @@ export default function VRViewerPage() {
               <p className="text-sm text-white/70">
                 {panoramicImages.length} panoramic view
                 {panoramicImages.length !== 1 ? "s" : ""} available
-                {stagingSession && " • Virtual Staging Ready"}
               </p>
             </div>
           </div>
-          {stagingSession && (
-            <button
-              onClick={() => setShowStagingOverlay(true)}
-              className="bg-vista-accent hover:bg-vista-accent/80 flex items-center gap-2 rounded-lg px-4 py-2 text-white transition-colors"
-            >
-              <Wand2 size={18} />
-              Virtual Staging
-            </button>
-          )}
         </div>
       </div>
 
@@ -258,125 +281,6 @@ export default function VRViewerPage() {
                 </button>
               ))}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Virtual Staging Overlay */}
-      {showStagingOverlay && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-vista-primary text-xl font-bold">
-                Virtual Staging
-              </h3>
-              <button
-                onClick={() => setShowStagingOverlay(false)}
-                className="rounded-lg p-2 transition-colors hover:bg-gray-100"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="mb-4">
-              <p className="text-vista-text/70 mb-2 text-sm">
-                Describe the changes you want to make to this panoramic view:
-              </p>
-              <textarea
-                value={stagingPrompt}
-                onChange={(e) => setStagingPrompt(e.target.value)}
-                placeholder="e.g., Add modern furniture, warm lighting, and contemporary decor..."
-                className="focus:ring-vista-accent h-24 w-full resize-none rounded-lg border border-gray-300 p-3 focus:ring-2 focus:outline-none"
-                disabled={isGenerating}
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={handleGenerateStaging}
-                disabled={!stagingPrompt.trim() || isGenerating}
-                className="bg-vista-accent hover:bg-vista-accent/90 flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Wand2 size={18} />
-                    Generate Staging
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() => setShowStagingOverlay(false)}
-                className="px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
-                disabled={isGenerating}
-              >
-                Cancel
-              </button>
-            </div>
-
-            {error && (
-              <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Generation Result Overlay */}
-      {generationResult && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/80 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6">
-            <div className="mb-4 flex items-center gap-3">
-              <CheckCircle className="text-green-500" size={24} />
-              <h3 className="text-vista-primary text-xl font-bold">
-                Staging Generated!
-              </h3>
-            </div>
-
-            <p className="text-vista-text/70 mb-4 text-sm">
-              Your virtual staging has been created successfully.
-            </p>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setGenerationResult(null);
-                  // TODO: Navigate to view the staged image
-                }}
-                className="bg-vista-accent hover:bg-vista-accent/90 flex-1 rounded-lg px-4 py-2 text-white transition-colors"
-              >
-                View Result
-              </button>
-              <button
-                onClick={() => setGenerationResult(null)}
-                className="px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Loading Overlay */}
-      {isCreatingSession && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/80">
-          <div className="rounded-2xl bg-white p-6 text-center">
-            <Loader2
-              size={24}
-              className="text-vista-accent mx-auto mb-2 animate-spin"
-            />
-            <p className="text-vista-primary font-medium">
-              Initializing Virtual Staging...
-            </p>
-            <p className="text-vista-text/70 mt-1 text-sm">
-              Setting up your session
-            </p>
           </div>
         </div>
       )}
