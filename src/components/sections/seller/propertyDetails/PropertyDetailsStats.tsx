@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import type { Property } from "../../../../types/property";
-import { propertyDatabase } from "../../../../data/properties";
 
 interface PropertyDetailsStatsProps {
   property: Property;
@@ -140,7 +139,7 @@ export function PropertyDetailsStats({
             </label>
             <input
               type="number"
-              value={formData.bedrooms}
+              value={formData.bedrooms || ""}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
@@ -156,7 +155,7 @@ export function PropertyDetailsStats({
             </label>
             <input
               type="number"
-              value={formData.bathrooms}
+              value={formData.bathrooms || ""}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
@@ -190,7 +189,7 @@ export function PropertyDetailsStats({
             </label>
             <input
               type="number"
-              value={formData.floorArea}
+              value={formData.floorArea || ""}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,

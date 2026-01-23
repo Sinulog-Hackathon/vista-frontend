@@ -58,7 +58,7 @@ export function PropertyDetailsFinancial({
               Ownership Status
             </label>
             <select
-              value={formData.ownershipStatus}
+              value={formData.ownershipStatus || ""}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
@@ -79,7 +79,7 @@ export function PropertyDetailsFinancial({
             </label>
             <input
               type="text"
-              value={formData.taxStatus}
+              value={formData.taxStatus || ""}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,

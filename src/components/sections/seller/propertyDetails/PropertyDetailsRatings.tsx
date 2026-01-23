@@ -12,11 +12,9 @@ export function PropertyDetailsRatings({
   const { ratings } = property;
 
   const ratingCategories = [
-    { label: "Build Quality", value: ratings.breakdown.cleanliness },
-    { label: "Property Value", value: ratings.breakdown.accuracy },
-    { label: "Location Appeal", value: ratings.breakdown.communication },
-    { label: "Neighborhood", value: ratings.breakdown.location },
-    { label: "Investment Potential", value: ratings.breakdown.value },
+    { label: "Cleanliness", value: ratings.cleanliness },
+    { label: "Location", value: ratings.location },
+    { label: "Value", value: ratings.value },
   ];
 
   return (
@@ -36,14 +34,14 @@ export function PropertyDetailsRatings({
           <div className="flex items-center gap-3">
             <div className="text-center">
               <p className="text-vista-primary text-4xl font-bold">
-                {ratings.overallRating}
+                {ratings.overall.toFixed(1)}
               </p>
               <div className="mt-1 flex items-center gap-1">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
                     className={`h-4 w-4 ${
-                      i < Math.floor(ratings.overallRating)
+                      i < Math.floor(ratings.overall)
                         ? "fill-yellow-400 text-yellow-400"
                         : "text-vista-text/20"
                     }`}
@@ -54,13 +52,10 @@ export function PropertyDetailsRatings({
           </div>
           <div>
             <p className="text-vista-text/70 text-sm">
-              <span className="text-vista-primary font-semibold">
-                {ratings.totalReviews}
-              </span>{" "}
-              buyer reviews and valuations
+              Overall property rating
             </p>
             <p className="text-vista-text/60 mt-1 text-xs">
-              Based on market analysis and buyer satisfaction
+              Based on market analysis
             </p>
           </div>
         </div>

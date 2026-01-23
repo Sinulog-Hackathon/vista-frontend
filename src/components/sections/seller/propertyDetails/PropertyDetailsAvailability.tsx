@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Calendar, PawPrint, Cigarette, Edit2, Check, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { Property } from "../../../../types/property";
 import { propertyDatabase } from "../../../../data/properties";
 
@@ -15,7 +15,10 @@ export function PropertyDetailsAvailability({
 }: PropertyDetailsAvailabilityProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState<Property>(property);
+  const [formData, setFormData] = useState<Property>(() => ({
+    ...property,
+    availabilityDate: property.availabilityDate || new Date().toISOString(),
+  }));
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -30,6 +33,11 @@ export function PropertyDetailsAvailability({
     setFormData(property);
     setIsEditing(false);
   };
+
+  const formattedDate = useMemo(() => {
+    const dateValue = formData.availabilityDate || new Date().toISOString();
+    return new Date(dateValue).toISOString().split("T")[0];
+  }, [formData.availabilityDate]);
 
   if (isEditing) {
     return (
@@ -51,9 +59,7 @@ export function PropertyDetailsAvailability({
             </label>
             <input
               type="date"
-              value={
-                new Date(formData.availabilityDate).toISOString().split("T")[0]
-              }
+              value={formattedDate}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
@@ -86,7 +92,7 @@ export function PropertyDetailsAvailability({
               Pet Policy
             </label>
             <select
-              value={formData.petPolicy}
+              value={formData.petPolicy || ""}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
@@ -106,7 +112,7 @@ export function PropertyDetailsAvailability({
               Smoking Policy
             </label>
             <select
-              value={formData.smokingPolicy}
+              value={formData.smokingPolicy || ""}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
@@ -167,7 +173,9 @@ export function PropertyDetailsAvailability({
           <div>
             <p className="text-vista-text/60 text-sm">Available From</p>
             <p className="text-vista-primary font-semibold">
-              {new Date(property.availabilityDate).toLocaleDateString()}
+              {property.availabilityDate
+                ? new Date(property.availabilityDate).toLocaleDateString()
+                : "Not set"}
             </p>
           </div>
         </div>

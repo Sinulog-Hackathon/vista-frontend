@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Star, Globe, Phone, Mail } from "lucide-react";
+import { Globe, Phone, Mail } from "lucide-react";
 import type { Property } from "../../../../types/property";
 
 interface PropertyDetailsDeveloperProps {
@@ -22,35 +22,16 @@ export function PropertyDetailsDeveloper({
     >
       <h2 className="text-vista-primary mb-6 text-xl font-bold">Developer</h2>
       <div className="flex items-start gap-4">
-        <img
-          src={developer.image}
-          alt={developer.name}
-          className="border-vista-accent/20 h-20 w-20 rounded-full border-2 object-cover"
-        />
+        <div className="bg-vista-accent/10 h-20 w-20 rounded-full border-2 border-vista-accent/20 flex items-center justify-center" />
         <div className="flex-1">
           <h3 className="text-vista-primary text-lg font-bold">
             {developer.name}
           </h3>
 
-          {/* Rating */}
+          {/* Years in Business */}
           <div className="mt-2 flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${
-                    i < Math.floor(developer.rating)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-vista-text/20"
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-vista-primary text-sm font-semibold">
-              {developer.rating}
-            </span>
-            <span className="text-vista-text/60 text-xs">
-              ({developer.reviews} reviews)
+            <span className="text-vista-text/70 text-sm">
+              <span className="font-semibold">{developer.years || 0}</span> years in business
             </span>
           </div>
 
@@ -60,8 +41,8 @@ export function PropertyDetailsDeveloper({
           {/* Experience & Contact */}
           <div className="border-vista-surface mt-4 space-y-2 border-t pt-4">
             <p className="text-vista-text/70 text-xs">
-              <span className="font-semibold">In Business:</span>{" "}
-              {developer.yearsInBusiness} years
+              <span className="font-semibold">Years:</span>{" "}
+              {developer.years || 0} years
             </p>
             <div className="flex gap-3">
               {developer.website && (
