@@ -1,25 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, MessageCircle } from "lucide-react";
-
-interface Message {
-  id: string;
-  text: string;
-  sender: "user" | "bot";
-  timestamp: Date;
-}
+import { useMarkAI } from "../../hooks/useMarkAI";
 
 export function MarkAI() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { messages, isOpen, setIsOpen, addMessage } = useMarkAI();
   const [isHovered, setIsHovered] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "Hi! I'm Mark AI. How can I help you find your perfect property today?",
-      sender: "bot",
-      timestamp: new Date(),
-    },
-  ]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
@@ -27,26 +13,16 @@ export function MarkAI() {
     if (inputValue.trim() === "") return;
 
     // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputValue,
-      sender: "user",
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(inputValue, "user");
     setInputValue("");
     setIsTyping(true);
 
     // Simulate bot response
     setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "Thanks for your message! I'm here to help you find properties that match your needs. What are you looking for?",
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
+      addMessage(
+        "Thanks for your message! I'm here to help you find properties that match your needs. What are you looking for?",
+        "bot"
+      );
       setIsTyping(false);
     }, 1000);
   };
