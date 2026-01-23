@@ -68,6 +68,15 @@ export function MarketplaceSearch({ onSearch }: MarketplaceSearchProps) {
     }
   };
 
+  const hasActiveFilters = location || propertyType || priceRange || bedrooms;
+
+  const clearAllFilters = () => {
+    setLocation("");
+    setPropertyType("");
+    setPriceRange("");
+    setBedrooms("");
+  };
+
   return (
     <div className="shadow-soft relative mx-auto flex w-full max-w-4xl items-center rounded-full border border-gray-200 bg-white px-2 py-1 transition-shadow hover:shadow-md">
       {/* Location */}
@@ -257,6 +266,16 @@ export function MarketplaceSearch({ onSearch }: MarketplaceSearchProps) {
         >
           <Search className="h-4 w-4 font-bold" strokeWidth={3} />
         </button>
+
+        {/* Clear All Filters Button */}
+        {hasActiveFilters && (
+          <button
+            onClick={clearAllFilters}
+            className="ml-2 flex-shrink-0 rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
+          >
+            Clear All
+          </button>
+        )}
       </div>
     </div>
   );
