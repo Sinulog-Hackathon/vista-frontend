@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { BarChart3, Eye, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { BarChart3, Eye, } from "lucide-react";
 import { getSellerProperties } from "../../../../services/propertyService";
 import type { SellerPropertyItem } from "../../../../types/property";
 import { generatePropertyStats } from "../../../../utils/randomUtils";
@@ -84,31 +84,31 @@ interface PropertyCardProps {
 }
 
 function PropertyCard({ property, delay, onNavigate }: PropertyCardProps) {
-  const statusConfig = {
-    published: {
-      icon: CheckCircle2,
-      color: "text-white bg-green-600",
-      label: "Published",
-    },
-    pending_review: {
-      icon: Clock,
-      color: "text-white bg-amber-600",
-      label: "Pending Review",
-    },
-    draft: {
-      icon: AlertCircle,
-      color: "text-white bg-gray-500",
-      label: "Draft",
-    },
-    rejected: {
-      icon: AlertCircle,
-      color: "text-white bg-red-600",
-      label: "Rejected",
-    },
-  };
+  // const statusConfig = {
+  //   published: {
+  //     icon: CheckCircle2,
+  //     color: "text-white bg-green-600",
+  //     label: "Published",
+  //   },
+  //   pending_review: {
+  //     icon: Clock,
+  //     color: "text-white bg-amber-600",
+  //     label: "Pending Review",
+  //   },
+  //   draft: {
+  //     icon: AlertCircle,
+  //     color: "text-white bg-gray-500",
+  //     label: "Draft",
+  //   },
+  //   rejected: {
+  //     icon: AlertCircle,
+  //     color: "text-white bg-red-600",
+  //     label: "Rejected",
+  //   },
+  // };
 
-  const status = statusConfig[property.status];
-  const StatusIcon = status.icon;
+  // const status = statusConfig[property.status];
+  // const StatusIcon = status.icon;
 
   return (
     <motion.div

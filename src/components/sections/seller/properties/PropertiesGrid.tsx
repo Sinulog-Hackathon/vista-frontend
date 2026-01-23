@@ -8,33 +8,31 @@ import {
   AlertCircle,
   Trash2,
   Edit2,
-  CheckCircle2,
-  Clock,
 } from "lucide-react";
 import { getSellerProperties } from "../../../../services/propertyService";
 import type { SellerPropertyItem } from "../../../../types/property";
 import { generatePropertyStats } from "../../../../utils/randomUtils";
 
-const statusColors = {
-  published: "bg-green-600 text-white",
-  pending_review: "bg-amber-600 text-white",
-  draft: "bg-gray-500 text-white",
-  rejected: "bg-red-600 text-white",
-};
+// const statusColors = {
+//   published: "bg-green-600 text-white",
+//   pending_review: "bg-amber-600 text-white",
+//   draft: "bg-gray-500 text-white",
+//   rejected: "bg-red-600 text-white",
+// };
 
-const statusIcons = {
-  published: CheckCircle2,
-  pending_review: Clock,
-  draft: AlertCircle,
-  rejected: AlertCircle,
-};
+// const statusIcons = {
+//   published: CheckCircle2,
+//   pending_review: Clock,
+//   draft: AlertCircle,
+//   rejected: AlertCircle,
+// };
 
-const statusLabels = {
-  published: "Published",
-  pending_review: "Pending Review",
-  draft: "Draft",
-  rejected: "Rejected",
-};
+// const statusLabels = {
+//   published: "Published",
+//   pending_review: "Pending Review",
+//   draft: "Draft",
+//   rejected: "Rejected",
+// };
 
 export function PropertiesGrid() {
   const navigate = useNavigate();
