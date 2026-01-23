@@ -19,7 +19,6 @@ import { PropertyCard } from "../../features/buyer/components/PropertyCard";
 import type { Property } from "../../features/buyer/types/property.types";
 import { propertySections } from "../../data/marketplaceProperties";
 import allProperties from "../../data/marketplaceProperties";
-import { MarkAI } from "../../components/chatbot/MarkAI";
 
 export default function Marketplace() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -297,8 +296,6 @@ export default function Marketplace() {
           </div>
         ))}
       </main>
-
-      <MarkAI />
     </div>
   );
 }
