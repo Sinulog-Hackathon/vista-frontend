@@ -24,15 +24,32 @@ export function PropertiesHeader({ onPropertyCreated }: PropertiesHeaderProps) {
           ? propertyData.regularImages[0]
           : undefined;
 
+    // Extract files from image objects
+    const regularFiles = propertyData.regularImages.map((img) => img.file);
+    const panoramicFiles = propertyData.panoramicImages.map((img) => img.file);
+
+    // Helper to convert empty strings to undefined
+    const toUndefinedIfEmpty = (
+      value: string | undefined
+    ): string | undefined => (value === "" ? undefined : value);
+
     const formInput: PropertyFormInput = {
       ...propertyData,
+      regularImages: regularFiles,
+      panoramicImages: panoramicFiles,
+      // Ensure propertyType and listingType have valid values
+      propertyType: (propertyData.propertyType || "House") as any,
+      listingType: (propertyData.listingType || "For Sale") as any,
+      // Convert empty strings to undefined for optional enum fields
+      furnishing: toUndefinedIfEmpty(propertyData.furnishing) as any,
+      condition: toUndefinedIfEmpty(propertyData.condition) as any,
       // Use selected thumbnail or first image as fallback
-      image: selectedThumbnail,
+      image: selectedThumbnail?.file,
       // Keep as strings, let backend handle conversion
       // Add required fields
       status: "draft" as const,
       user_id: "user_123456", // TODO: Get from auth context
-    } as PropertyFormInput;
+    };
 
     console.log("Submitting property:", formInput);
     await createProperty(formInput);
