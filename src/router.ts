@@ -6,6 +6,7 @@ import SellerDashboard from "./pages/SellerDashboard";
 import SellerPropertiesPage from "./pages/SellerPropertiesPage";
 import PropertyDetailsPage from "./pages/SellerPropertyDetailsPage";
 import Marketplace from "./pages/buyer/Marketplace";
+import BuyerLogin from "./pages/buyer/BuyerLogin";
 
 export default createBrowserRouter([
   {
@@ -32,5 +33,6 @@ export default createBrowserRouter([
     path: "/seller/properties/:id",
     Component: PropertyDetailsPage,
   },
-  { path: "/buyer", Component: Marketplace },
+  { path: "/buyer", Component: BuyerLogin },
+  { path: "/buyer/marketplace", Component: Marketplace },
 ]);
