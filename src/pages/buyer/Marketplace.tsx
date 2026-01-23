@@ -6,7 +6,7 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   MarketplaceSearch,
@@ -16,6 +16,7 @@ import { PropertyCard } from "../../features/buyer/components/PropertyCard";
 import type { Property } from "../../features/buyer/types/property.types";
 import { propertySections } from "../../data/marketplaceProperties";
 import allProperties from "../../data/marketplaceProperties";
+import { MarkAI } from "../../components/chatbot/MarkAI";
 
 export default function Marketplace() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -124,26 +125,40 @@ export default function Marketplace() {
               <User className="h-5 w-5 text-gray-700" />
             </button>
 
-            {showProfileDropdown && (
-              <div className="absolute top-12 right-0 w-56 rounded-lg border border-gray-200 bg-white shadow-lg">
-                <div className="py-2">
-                  <button
-                    className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                    onClick={() => setShowProfileDropdown(false)}
-                  >
-                    <Settings className="h-4 w-4" />
-                    <span>Account Settings</span>
-                  </button>
-                  <button
-                    className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>Logout</span>
-                  </button>
-                </div>
-              </div>
-            )}
+            <AnimatePresence>
+              {showProfileDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute top-12 right-0 w-56 rounded-lg border border-gray-200 bg-white shadow-lg"
+                >
+                  <div className="py-2">
+                    <motion.button
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.05 }}
+                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setShowProfileDropdown(false)}
+                    >
+                      <Settings className="h-4 w-4" />
+                      <span>Account Settings</span>
+                    </motion.button>
+                    <motion.button
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Logout</span>
+                    </motion.button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </motion.div>
@@ -216,6 +231,8 @@ export default function Marketplace() {
           </div>
         ))}
       </main>
+
+      <MarkAI />
     </div>
   );
 }
