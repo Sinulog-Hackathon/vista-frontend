@@ -29,17 +29,23 @@ function createFormData(data: Partial<PropertyFormInput>): FormData {
   const formData = new FormData();
 
   Object.entries(data).forEach(([key, value]) => {
-    // 1. Handle Files
+    // 1. Handle Images with Labels
     // We append multiple values to the same key 'regularImages' (without brackets)
-    if (key === "regularImages" && Array.isArray(value)) {
-      (value as File[]).forEach((file) =>
-        formData.append("regularImages", file)
+    if (key === "regularImages" && Array.isArray(value) && value.length > 0 && typeof value[0] === 'object' && value[0] !== null && 'file' in value[0]) {
+      (value as unknown as Array<{ file: File; label: string }>).forEach(
+        (imageObj) => {
+          formData.append("regularImages", imageObj.file);
+          formData.append(`regularImages_labels`, imageObj.label);
+        }
       );
       return;
     }
-    if (key === "panoramicImages" && Array.isArray(value)) {
-      (value as File[]).forEach((file) =>
-        formData.append("panoramicImages", file)
+    if (key === "panoramicImages" && Array.isArray(value) && value.length > 0 && typeof value[0] === 'object' && value[0] !== null && 'file' in value[0]) {
+      (value as unknown as Array<{ file: File; label: string }>).forEach(
+        (imageObj) => {
+          formData.append("panoramicImages", imageObj.file);
+          formData.append(`panoramicImages_labels`, imageObj.label);
+        }
       );
       return;
     }
@@ -95,7 +101,6 @@ export async function createProperty(
   const formData = createFormData(data);
 
   console.log("FormData entries:");
-
 
   // Hardcode user_id or retrieve from your Auth Context if needed
   // formData.append('user_id', 'CURRENT_USER_ID');
