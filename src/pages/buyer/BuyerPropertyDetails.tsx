@@ -47,6 +47,8 @@ function ImageGalleryModal({
       if (e.key === "ArrowRight")
         onNavigate(currentIndex < images.length - 1 ? currentIndex + 1 : 0);
     };
+
+    console.log(images[currentIndex]?.label);
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentIndex, images.length, onClose, onNavigate]);
@@ -79,6 +81,18 @@ function ImageGalleryModal({
       >
         <ChevronLeft className="h-6 w-6" />
       </button>
+
+      {/* Image Label - Upper Right Corner */}
+      {images[currentIndex]?.label && (
+        <div className="absolute top-6 right-20 z-10">
+          <div className="rounded-lg bg-black/70 px-6 py-3 backdrop-blur-sm">
+            <p className="text-xl font-bold text-white">
+              {images[currentIndex].label}
+            </p>
+          </div>
+        </div>
+      )}
+
       <motion.img
         key={currentIndex}
         initial={{
@@ -98,6 +112,7 @@ function ImageGalleryModal({
         className="max-h-[85vh] max-w-[85vw] rounded-2xl object-contain shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       />
+
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -108,7 +123,16 @@ function ImageGalleryModal({
         <ChevronRight className="h-6 w-6" />
       </button>
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-md">
-        {currentIndex + 1} / {images.length}
+        <div className="flex items-center gap-3">
+          <span>
+            {currentIndex + 1} / {images.length}
+          </span>
+          {images[currentIndex]?.label && (
+            <span className="text-vista-accent">
+              • {images[currentIndex].label}
+            </span>
+          )}
+        </div>
       </div>
     </motion.div>
   );
@@ -259,7 +283,7 @@ function PropertyImageGallery({
                 </div>
                 <div className="absolute inset-0 flex items-end justify-center bg-black/0 pb-1 transition-colors group-hover:bg-black/40">
                   <p className="px-1 text-center text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100">
-                    {img.id || `View ${idx + 1}`}
+                    {img.label || img.id || `View ${idx + 1}`}
                   </p>
                 </div>
               </button>

@@ -146,8 +146,10 @@ export default function VRViewerPage() {
     .filter((img: any) => img.imageType === "panoramic")
     .map((img: any) => ({
       url: img.url,
-      title: img.filename || "Panoramic View",
-      description: "",
+      title: img.label || "Unlabeled Room",
+      description: img.label
+        ? `${img.label} - Panoramic View`
+        : "Unlabeled Room - Panoramic View",
     }));
 
   // Use extracted panoramic images if available, otherwise use the panoramicImages array (backward compatibility)
@@ -247,6 +249,17 @@ export default function VRViewerPage() {
           </div>
         </div>
       </div>
+
+      {/* Current Image Label - Upper Right Corner */}
+      {panoramicImages.length > 0 && (
+        <div className="absolute top-4 right-4 z-20">
+          <div className="rounded-lg bg-black/70 px-6 py-3 backdrop-blur-sm">
+            <p className="text-xl font-bold text-white">
+              {panoramicImages[currentImageIndex].title || "Unlabeled Room"}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Panoramic Views List - Bottom Overlay - Auto-hide */}
       {panoramicImages.length > 1 && (
