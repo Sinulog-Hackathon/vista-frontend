@@ -9,6 +9,7 @@ interface PanoramaViewerProps {
   height?: string | number;
   onReady?: () => void;
   useDeviceOrientation?: boolean;
+  vrMode?: boolean; // Enable side-by-side stereoscopic VR
 }
 
 function PanoramaScene({ imageUrl, onTextureLoaded }: { imageUrl: string; onTextureLoaded?: () => void }) {
