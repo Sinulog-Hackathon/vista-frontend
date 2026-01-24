@@ -1,7 +1,11 @@
 import { useState, useEffect, type ReactNode } from "react";
-import { MarkAIContext, type Message } from "./MarkAIContext";
+import {
+  MarkAIContext,
+  type Message,
+  type PropertyCardData,
+} from "./MarkAIContext";
 
-// Type Guard to validate localStorage data safely without using 'any'
+// Type Guard
 function isMessageArray(data: unknown): data is Message[] {
   return (
     Array.isArray(data) &&
@@ -34,10 +38,10 @@ export function MarkAIProvider({ children }: { children: ReactNode }) {
     try {
       const parsed: unknown = JSON.parse(saved);
       if (isMessageArray(parsed)) {
-        // Hydrate timestamps from strings back to Date objects
         return parsed.map((m) => ({
           ...m,
           timestamp: new Date(m.timestamp),
+          properties: m.properties || undefined, // Explicitly restore properties
         }));
       }
     } catch (e) {
@@ -48,17 +52,27 @@ export function MarkAIProvider({ children }: { children: ReactNode }) {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  // Persistence logic: saves to browser whenever messages change
+  // Persistence logic
   useEffect(() => {
     localStorage.setItem("vista_chat_history", JSON.stringify(messages));
   }, [messages]);
 
-  const addMessage = (text: string, sender: "user" | "bot") => {
+  const addMessage = (
+    text: string,
+    sender: "user" | "bot",
+    properties?: PropertyCardData[]
+  ) => {
+    // DEBUG LOG: Check if properties are actually arriving here
+    if (properties) {
+      console.log("Saving Message with Properties:", properties);
+    }
+
     const newMessage: Message = {
       id: Date.now().toString(),
       text,
       sender,
       timestamp: new Date(),
+      properties: properties, // <--- Ensure this is assigned
     };
     setMessages((prev) => [...prev, newMessage]);
   };

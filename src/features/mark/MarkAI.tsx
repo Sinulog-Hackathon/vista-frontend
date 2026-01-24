@@ -4,6 +4,7 @@ import { X, Send, MessageCircle } from "lucide-react";
 import axios from "axios";
 import { useMarkAI } from "../../hooks/useMarkAI";
 import env from "../../utils/env";
+import { PropertyCarousel } from "./PropertyCarousel";
 
 // Parse markdown-like formatting in messages
 function parseMessageContent(text: string): React.ReactNode[] {
@@ -211,7 +212,7 @@ export function MarkAI() {
   };
 
   return (
-    <div className="fixed right-3 bottom-3 z-40 sm:right-6 sm:bottom-6">
+    <div className="fixed right-3 bottom-3 z-40 font-sans sm:right-6 sm:bottom-6">
       <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
@@ -263,7 +264,7 @@ export function MarkAI() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`flex ${
+                    className={`flex flex-col ${
                       message.sender === "user"
                         ? "justify-end"
                         : "justify-start"
@@ -285,6 +286,13 @@ export function MarkAI() {
                             </span>
                           ))}
                     </div>
+
+                    {/* Property Cards Render Logic */}
+                    {message.properties && message.properties.length > 0 && (
+                      <div className="mt-2 w-full max-w-[90%] sm:max-w-sm">
+                        <PropertyCarousel properties={message.properties} />
+                      </div>
+                    )}
                   </motion.div>
                 ))}
 
