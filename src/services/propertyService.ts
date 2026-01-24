@@ -10,9 +10,9 @@ import type {
   BuyerPropertiesViewResponse,
   DeletePropertyResponse,
 } from "../features/buyer/types/property.types";
+import env from "../utils/env";
 
-const BASE_URL = "http://localhost:5000/api";
-
+const { BASE_URL } = env;
 // Fields that your Python service passes to `_parse_json_array`
 const JSON_FIELDS = [
   "amenities",
