@@ -16,7 +16,6 @@ import {
   ChevronRight,
   X,
   Maximize2,
-  RotateCcw,
   School,
   ShoppingBag,
   Star,
