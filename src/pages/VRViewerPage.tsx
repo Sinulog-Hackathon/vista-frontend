@@ -580,7 +580,7 @@ export default function VRViewerPage() {
 
       {/* CTA: Tap to enable voice (requests mic permission and starts listening) */}
       { browserSupportsSpeechRecognition && inputMode === 'voice' && !voiceActive && (!isMobile || (orientationPermission === 'granted' && !isPortrait)) && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
+        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
           <button
             className="bg-vista-accent text-black font-medium rounded-full px-5 py-2 shadow hover:opacity-90 active:opacity-80 cursor-pointer"
             onClick={async () => {
