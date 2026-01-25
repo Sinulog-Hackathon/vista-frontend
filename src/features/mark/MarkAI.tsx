@@ -243,7 +243,7 @@ export function MarkAI() {
                 </div>
                 <div>
                   <h3 className="font-semibold tracking-wide">Mark AI</h3>
-                  <p className="text-white/70 text-xs">
+                  <p className="text-xs text-white/70">
                     Vista's Real Estate Assistant
                   </p>
                 </div>
@@ -439,7 +439,9 @@ export function MarkAI() {
               className="pointer-events-none absolute right-0 bottom-16 hidden rounded-lg bg-gray-900 px-3 py-2 text-sm whitespace-nowrap text-white shadow-lg sm:block"
             >
               <span className="font-semibold">Mark AI</span>
-              <span className="ml-1 text-gray-400">• Real Estate Assistant</span>
+              <span className="ml-1 text-gray-400">
+                • Real Estate Assistant
+              </span>
               <motion.div className="absolute right-4 -bottom-1 h-2 w-2 rotate-45 bg-gray-900" />
             </motion.div>
           )}
