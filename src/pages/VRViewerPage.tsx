@@ -144,6 +144,7 @@ export default function VRViewerPage() {
   const [furnitureData, setFurnitureData] = useState<FurnitureApiResponse>();
   const [isFurnitureLoading, setIsFurnitureLoading] = useState(false);
   const [furnitureLoadingStep, setFurnitureLoadingStep] = useState(0);
+  const [isStagedImageLoading, setIsStagedImageLoading] = useState(false);
 
   // Initialize budget from localStorage or default
   const [setupStep, setSetupStep] = useState<"budget" | "input-mode" | "done">(
@@ -209,12 +210,11 @@ export default function VRViewerPage() {
   const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [liveTranscript, setLiveTranscript] = useState<string>("");
 
-  // Extract panoramic images early (needed for voice commands and rendering)
-  // First check if panoramic images were passed from session (updated URLs)
+  // Initialize panoramic images from session or property
   const sessionPanoramicImages =
     (location.state as any)?.panoramicImagesFromSession || null;
 
-  const extractedPanoramicImages = sessionPanoramicImages
+  const initialPanoramicImages = sessionPanoramicImages
     ? sessionPanoramicImages.map((img: any) => ({
         url: img.url,
         title: img.filename || "Panoramic View",
@@ -228,10 +228,11 @@ export default function VRViewerPage() {
           description: "",
         }));
 
-  const panoramicImages =
-    extractedPanoramicImages.length > 0
-      ? extractedPanoramicImages
-      : property?.panoramicImages || [];
+  const [panoramicImages, setPanoramicImages] = useState<any[]>(
+    initialPanoramicImages.length > 0
+      ? initialPanoramicImages
+      : property?.panoramicImages || []
+  );
 
   const isMobile = isMobileDevice();
 
@@ -309,6 +310,7 @@ export default function VRViewerPage() {
 
     setIsGenerating(true);
     setGenerationError(null);
+    setStagedImageUrl(null); // Clear previous staged image first
 
     try {
       const response = await virtualStagingService.generateStaging({
@@ -319,8 +321,9 @@ export default function VRViewerPage() {
       });
 
       console.log("Staging generation response:", response);
-      // Override current image with generated image
+      // Set new staged image URL
       setStagedImageUrl(response.new_panorama_url);
+      setIsStagedImageLoading(true); // Show loading while image loads
       console.log("Generated staged image:", response.new_panorama_url);
     } catch (error: any) {
       console.error("Failed to generate staging:", error);
@@ -339,9 +342,11 @@ export default function VRViewerPage() {
       img.src = proxyUrl;
       img.onload = () => {
         console.log("✅ Staged image preloaded:", stagedImageUrl);
+        setIsStagedImageLoading(false); // Image is ready
       };
       img.onerror = () => {
         console.error("❌ Failed to preload staged image:", stagedImageUrl);
+        setIsStagedImageLoading(false); // Stop loading even if failed
       };
     }
   }, [stagedImageUrl]);
@@ -378,14 +383,9 @@ export default function VRViewerPage() {
               title: img.filename || "Panoramic View",
               description: "",
             }));
-          // Update location state with new images
-          window.history.replaceState(
-            {
-              ...location.state,
-              panoramicImagesFromSession: newPanoramicImages,
-            },
-            ""
-          );
+          // Update state with new panoramic images
+          setPanoramicImages(newPanoramicImages);
+          console.log("✅ Panoramic images updated in state");
         }
       } catch (error) {
         console.error("Failed to refetch session:", error);
@@ -435,6 +435,8 @@ export default function VRViewerPage() {
 
   useEffect(() => {
     console.log("📸 Current image index changed to:", currentImageIndex);
+    // Clear staged image when navigating to a different panoramic image
+    setStagedImageUrl(null);
   }, [currentImageIndex]);
 
   // Process transcript from react-speech-recognition
@@ -1336,7 +1338,7 @@ export default function VRViewerPage() {
             vrMode={true}
           />
           {/* Loading Indicator */}
-          {isImagesLoading && (
+          {(isImagesLoading || isStagedImageLoading) && (
             <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/80">
               <div className="mb-4 flex flex-col items-center gap-3">
                 <div className="border-t-vista-accent h-12 w-12 animate-spin rounded-full border-4 border-white/20"></div>
