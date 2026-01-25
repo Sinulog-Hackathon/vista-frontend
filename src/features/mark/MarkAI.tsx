@@ -92,8 +92,13 @@ function parseMessageContent(text: string): React.ReactNode[] {
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
 
-    // 1. Skip completely empty lines, but DON'T close the list yet
-    if (trimmedLine === "") return;
+    // 1. Handle empty lines - add paragraph spacing
+    if (trimmedLine === "") {
+      closeCurrentList(index);
+      // Add a spacer div for paragraph breaks
+      elements.push(<div key={`spacer-${index}`} className="h-3" />);
+      return;
+    }
 
     // 2. Regex Patterns
     const numberedMatch = trimmedLine.match(/^(\d+)\.\s+(.+)$/);
