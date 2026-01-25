@@ -83,6 +83,19 @@ export function MarkAIProvider({ children }: { children: ReactNode }) {
 
   const notifyPropertyView = async (propertyId: string) => {
     setIsOpen(true);
+
+    // 1. Immediately add a placeholder user message (shown right away)
+    const userMsgId = Date.now().toString() + "_user_prop";
+    const placeholderUserMsg: Message = {
+      id: userMsgId,
+      text: "I'm interested in this property:",
+      sender: "user",
+      timestamp: new Date(),
+      // Properties will be updated once we fetch the data
+    };
+    setMessages((prev) => [...prev, placeholderUserMsg]);
+
+    // 2. Now set loading state so the typing indicator appears
     setIsSummaryLoading(true);
 
     const formattedHistory = messages.slice(-20).map((msg) => ({
@@ -111,7 +124,7 @@ export function MarkAIProvider({ children }: { children: ReactNode }) {
         };
         setMessages((prev) => [...prev, contextMsg]);
 
-        // 3b. Add Visible User Message with Property Card
+        // 3b. Update the placeholder user message with property card data
         const propertyCard: PropertyCardData = {
           propertyId: property._id || property.propertyId,
           name: property.name,
@@ -124,34 +137,35 @@ export function MarkAIProvider({ children }: { children: ReactNode }) {
           image: property.images?.[0] || property.image,
         };
 
-        const userPropertyMsg: Message = {
-          id: Date.now().toString() + "_user_prop",
-          text: "I'm interested in this property:",
-          sender: "user",
-          timestamp: new Date(),
-          properties: [propertyCard],
-        };
-        setMessages((prev) => [...prev, userPropertyMsg]);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === userMsgId ? { ...msg, properties: [propertyCard] } : msg
+          )
+        );
       }
 
       // 4. Add Visible Summary
       if (summary) {
-        setTimeout(() => {
-          const summaryMsg: Message = {
-            id: Date.now().toString(),
-            text: summary,
-            sender: "bot",
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, summaryMsg]);
-          setIsSummaryLoading(false);
-        }, 400);
-      } else {
-        setIsSummaryLoading(false);
+        const summaryMsg: Message = {
+          id: Date.now().toString(),
+          text: summary,
+          sender: "bot",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, summaryMsg]);
       }
+      setIsSummaryLoading(false);
     } catch (error) {
       setIsSummaryLoading(false);
       console.error("Failed to fetch property summary", error);
+      // Add error message so user knows something went wrong
+      const errorMsg: Message = {
+        id: Date.now().toString() + "_error",
+        text: "Sorry, I couldn't load the property details. Please try again.",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMsg]);
     }
   };
 
