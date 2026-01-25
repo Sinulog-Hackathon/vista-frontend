@@ -54,18 +54,30 @@ export function AIPromoSection() {
                 photos—no physical furniture required.
               </motion.p>
 
-              <motion.button
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.5 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-vista-accent hover:bg-vista-accent/90 flex items-center gap-2 rounded-full px-6 py-3 font-bold text-white transition-colors"
+                className="flex flex-col gap-3 sm:flex-row sm:gap-3"
               >
-                <Layers className="h-5 w-5" />
-                Try AI Staging Now
-              </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-vista-accent hover:bg-vista-accent/90 flex items-center justify-center gap-2 rounded-full px-6 py-3 font-bold text-white transition-colors"
+                >
+                  <Layers className="h-5 w-5" />
+                  Use Existing Session
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center gap-2 rounded-full border border-white/30 px-6 py-3 font-bold text-white transition-colors hover:bg-white/10"
+                >
+                  <Layers className="h-5 w-5" />
+                  Create New Session
+                </motion.button>
+              </motion.div>
             </div>
 
             <motion.div
@@ -105,7 +117,7 @@ export function AIPromoSection() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.7 }}
-                className="absolute -left-4 bottom-4 rounded-lg bg-white px-3 py-2 shadow-lg md:-left-8"
+                className="absolute bottom-4 -left-4 rounded-lg bg-white px-3 py-2 shadow-lg md:-left-8"
               >
                 <div className="text-vista-primary text-xs font-bold">
                   Before
@@ -118,7 +130,7 @@ export function AIPromoSection() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.8 }}
-                className="absolute -right-4 top-4 rounded-lg bg-white px-3 py-2 shadow-lg md:-right-8"
+                className="absolute top-4 -right-4 rounded-lg bg-white px-3 py-2 shadow-lg md:-right-8"
               >
                 <div className="text-vista-accent text-xs font-bold">After</div>
                 <div className="text-vista-text/60 text-xs">AI Staged</div>

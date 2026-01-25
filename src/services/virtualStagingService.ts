@@ -1,6 +1,9 @@
 // Virtual Staging API Service
 // This service handles all API calls to the Virtual Staging backend
 
+import type { FurnitureApiResponse } from "../pages/VRViewerPage";
+import env from "../utils/env";
+
 export interface VirtualStagingSession {
   session_id: string;
   property_id: string;
@@ -124,7 +127,8 @@ export interface ChatHistoryResponse {
   }>;
 }
 
-const API_BASE_URL = "/api/staging";
+const { BASE_URL } = env;
+const API_BASE_URL = `${BASE_URL}/virtual-staging`;
 
 class VirtualStagingService {
   private async makeRequest<T>(
@@ -240,6 +244,34 @@ class VirtualStagingService {
 
   async getChatMessages(sessionId: string): Promise<ChatHistoryResponse> {
     return this.makeRequest(`/chat-history/${sessionId}/messages`);
+  }
+
+  async extractFurniture(
+    sessionId: string,
+    imageIndex: number,
+    budget?: string
+  ): Promise<FurnitureApiResponse> {
+    const response = await fetch(
+      `${API_BASE_URL}/extract-furniture/${sessionId}/${imageIndex}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          budget: budget,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error || `Request failed: ${response.statusText}`
+      );
+    }
+
+    return response.json();
   }
 }
 
