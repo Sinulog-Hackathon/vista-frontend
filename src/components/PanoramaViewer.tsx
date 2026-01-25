@@ -157,8 +157,9 @@ function DeviceOrientationController() {
     // - alpha (compass) controls left/right head turns (yaw)
     // - gamma controls up/down head nods (pitch) when phone is tilted
     // When phone is held horizontally at eye level, gamma = 0, pitch should = 0 (looking at walls)
+    // Negate gamma: tilting phone up (negative gamma) = looking up (positive pitch)
     
-    const pitch = THREE.MathUtils.clamp(gammaRad, -Math.PI / 3, Math.PI / 3);
+    const pitch = THREE.MathUtils.clamp(-gammaRad, -Math.PI / 3, Math.PI / 3);
     const yaw = alphaRad;
     const roll = 0; // Ignore roll for cleaner VR experience
     
