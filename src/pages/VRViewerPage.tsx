@@ -1264,7 +1264,8 @@ export default function VRViewerPage() {
       {browserSupportsSpeechRecognition &&
         inputMode === "voice" &&
         !voiceActive &&
-        ((orientationPermission === "granted" && !isPortrait)) && (
+        orientationPermission === "granted" &&
+        !isPortrait && (
           <div className="pointer-events-auto absolute bottom-32 left-1/2 z-50 -translate-x-1/2">
             <button
               className="bg-vista-accent cursor-pointer rounded-full px-5 py-2 font-medium text-black shadow hover:opacity-90 active:opacity-80"
