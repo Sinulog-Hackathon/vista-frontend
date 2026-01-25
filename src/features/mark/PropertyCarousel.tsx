@@ -73,7 +73,7 @@ export function PropertyCarousel({
             key={prop.propertyId}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex w-[240px] shrink-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+            className="flex w-60 shrink-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
           >
             {/* Image Section */}
             <div className="relative h-32 w-full bg-gray-100">

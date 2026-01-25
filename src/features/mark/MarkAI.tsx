@@ -6,6 +6,8 @@ import { useMarkAI } from "../../hooks/useMarkAI";
 import env from "../../utils/env";
 import { PropertyCarousel } from "./PropertyCarousel";
 
+import { UserSelectedPropertyCard } from "../../components/UserSelectedPropertyCard";
+
 // Parse markdown-like formatting in messages
 function parseMessageContent(text: string): React.ReactNode[] {
   // First, split by newlines (handle both \n and actual newlines)
@@ -288,8 +290,20 @@ export function MarkAI() {
 
                       {/* Property Cards Render Logic */}
                       {message.properties && message.properties.length > 0 && (
-                        <div className="mt-2 w-full max-w-[90%] sm:max-w-sm">
-                          <PropertyCarousel properties={message.properties} />
+                        <div
+                          className={`mt-2 w-full max-w-[90%] sm:max-w-sm ${
+                            message.sender === "user"
+                              ? "self-end"
+                              : "self-start"
+                          }`}
+                        >
+                          {message.sender === "user" ? (
+                            <UserSelectedPropertyCard
+                              property={message.properties[0]}
+                            />
+                          ) : (
+                            <PropertyCarousel properties={message.properties} />
+                          )}
                         </div>
                       )}
                     </motion.div>

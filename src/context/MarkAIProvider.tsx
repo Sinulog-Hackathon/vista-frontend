@@ -59,6 +59,7 @@ export function MarkAIProvider({ children }: { children: ReactNode }) {
   });
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
 
   // Persistence
   useEffect(() => {
@@ -81,10 +82,9 @@ export function MarkAIProvider({ children }: { children: ReactNode }) {
   };
 
   const notifyPropertyView = async (propertyId: string) => {
-    // 1. Open chat immediately
     setIsOpen(true);
+    setIsSummaryLoading(true);
 
-    // 2. Prepare history (including hidden context) for the AI
     const formattedHistory = messages.slice(-20).map((msg) => ({
       role: msg.sender === "user" ? "user" : "model",
       parts: [{ text: msg.text }],
@@ -102,20 +102,40 @@ export function MarkAIProvider({ children }: { children: ReactNode }) {
       if (property) {
         const contextMsg: Message = {
           id: Date.now().toString() + "_ctx",
-          // System injection prompt format
           text: `[SYSTEM INJECTION] User clicked/viewed property card. PROPERTY DATA: ${JSON.stringify(
             property
           )}`,
           sender: "user",
           timestamp: new Date(),
-          isHidden: true, // <--- Hides from UI
+          isHidden: true,
         };
         setMessages((prev) => [...prev, contextMsg]);
+
+        // 3b. Add Visible User Message with Property Card
+        const propertyCard: PropertyCardData = {
+          propertyId: property._id || property.propertyId,
+          name: property.name,
+          price: property.price,
+          address: property.address,
+          bedrooms: property.bedrooms,
+          bathrooms: property.bathrooms,
+          floorArea: property.floorArea,
+          propertyType: property.propertyType,
+          image: property.images?.[0] || property.image,
+        };
+
+        const userPropertyMsg: Message = {
+          id: Date.now().toString() + "_user_prop",
+          text: "I'm interested in this property:",
+          sender: "user",
+          timestamp: new Date(),
+          properties: [propertyCard],
+        };
+        setMessages((prev) => [...prev, userPropertyMsg]);
       }
 
       // 4. Add Visible Summary
       if (summary) {
-        // Small delay for natural feel
         setTimeout(() => {
           const summaryMsg: Message = {
             id: Date.now().toString(),
@@ -124,9 +144,13 @@ export function MarkAIProvider({ children }: { children: ReactNode }) {
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, summaryMsg]);
+          setIsSummaryLoading(false);
         }, 400);
+      } else {
+        setIsSummaryLoading(false);
       }
     } catch (error) {
+      setIsSummaryLoading(false);
       console.error("Failed to fetch property summary", error);
     }
   };
@@ -140,6 +164,7 @@ export function MarkAIProvider({ children }: { children: ReactNode }) {
         setIsOpen,
         addMessage,
         notifyPropertyView,
+        isSummaryLoading,
       }}
     >
       {children}

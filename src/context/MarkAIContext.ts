@@ -34,7 +34,8 @@ export interface MarkAIContextType {
     sender: "user" | "bot",
     properties?: PropertyCardData[]
   ) => void;
-  notifyPropertyView: (propertyId: string) => Promise<void>; // <--- NEW
+  notifyPropertyView: (propertyId: string) => Promise<void>;
+  isSummaryLoading: boolean;
 }
 
 export const MarkAIContext = createContext<MarkAIContextType | undefined>(
