@@ -148,10 +148,18 @@ export function MarkAI() {
 
   // Auto-scroll to bottom when messages change or typing state updates
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (isOpen && scrollRef.current) {
+      // We use a tiny timeout or requestAnimationFrame to ensure the
+      // Framer Motion entry animation has started and dimensions are calculated
+      const scrollContainer = scrollRef.current;
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+
+      // Safety fallback for mobile/slow renders
+      requestAnimationFrame(() => {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      });
     }
-  }, [messages, isTyping]);
+  }, [messages, isTyping, isOpen]);
 
   const handleSendMessage = async () => {
     if (inputValue.trim() === "" || isTyping) return;
