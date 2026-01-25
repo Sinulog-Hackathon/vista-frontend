@@ -866,6 +866,8 @@ export default function VRViewerPage() {
               onClick={() => {
                 setInputMode("voice");
                 setSetupStep("done");
+                // Desktop doesn't need device orientation permission, grant it automatically
+                setOrientationPermission("granted");
               }}
               className="bg-vista-accent hover:bg-vista-accent/80 rounded-lg px-8 py-4 font-semibold text-black transition-colors"
             >
