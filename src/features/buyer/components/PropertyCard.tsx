@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Heart, BedDouble, Bath, Home } from "lucide-react";
+import { useMarkAI } from "../../../hooks/useMarkAI"; // Import hook
 import type { PropertyCardPayload } from "../types/property.types";
 
 interface PropertyCardProps {
@@ -8,13 +9,17 @@ interface PropertyCardProps {
 
 export function PropertyCard({ property }: PropertyCardProps) {
   const navigate = useNavigate();
+  const { notifyPropertyView } = useMarkAI(); // Use context
 
-  // Extract city from address (e.g., "123 Ocean Drive, Cebu City, Cebu" -> "Cebu City")
+  // Extract city from address
   const cityFromAddress =
     property.address.split(",")[1]?.trim() || property.address;
 
   const handleClick = () => {
+    // 1. Navigate to page
     navigate(`/buyer/property/${property.propertyId}`);
+    // 2. Trigger AI Summary
+    notifyPropertyView(property.propertyId);
   };
 
   return (
@@ -43,8 +48,11 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </div>
         )}
 
-        {/* Heart Icon */}
-        <button className="absolute top-3 right-3 rounded-full p-1 transition-transform active:scale-90">
+        {/* Heart Icon - Stop propagation to avoid navigation */}
+        <button
+          className="absolute top-3 right-3 rounded-full p-1 transition-transform active:scale-90"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Heart className="h-6 w-6 text-white/70 hover:text-white" />
         </button>
       </div>

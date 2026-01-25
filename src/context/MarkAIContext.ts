@@ -19,7 +19,8 @@ export interface Message {
   text: string;
   sender: "user" | "bot";
   timestamp: Date;
-  properties?: PropertyCardData[]; // <--- THIS MUST BE HERE
+  properties?: PropertyCardData[];
+  isHidden?: boolean; // <--- NEW: Allows us to store context without showing it
 }
 
 // Define the Context Provider structure
@@ -31,8 +32,9 @@ export interface MarkAIContextType {
   addMessage: (
     text: string,
     sender: "user" | "bot",
-    properties?: PropertyCardData[] // <--- THIS MUST BE HERE
+    properties?: PropertyCardData[]
   ) => void;
+  notifyPropertyView: (propertyId: string) => Promise<void>; // <--- NEW
 }
 
 export const MarkAIContext = createContext<MarkAIContextType | undefined>(

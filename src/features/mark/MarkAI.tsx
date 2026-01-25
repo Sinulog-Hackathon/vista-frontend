@@ -153,23 +153,6 @@ export function MarkAI() {
     }
   }, [messages, isTyping]);
 
-  /* // Function commentedfor now
-  const handleClearHistory = () => {
-    if (window.confirm("Are you sure you want to clear your chat history?")) {
-      localStorage.removeItem("vista_chat_history");
-      // import this from useMarkAI
-      setMessages([
-        {
-          id: "1",
-          text: "Hi! I'm Mark AI. How can I help you find your perfect property today?",
-          sender: "bot",
-          timestamp: new Date(),
-        },
-      ]);
-    }
-  };
-  */
-
   const handleSendMessage = async () => {
     if (inputValue.trim() === "" || isTyping) return;
 
@@ -179,6 +162,7 @@ export function MarkAI() {
     setIsTyping(true);
 
     // Format history for Gemini API (Mapping "bot" to "model")
+    // Include hidden messages here so AI gets the context
     const formattedHistory = messages.slice(-20).map((msg) => ({
       role: msg.sender === "user" ? "user" : "model",
       parts: [{ text: msg.text }],
@@ -190,12 +174,14 @@ export function MarkAI() {
         history: formattedHistory,
       });
 
-      if (response.data && response.data.reply) {
-        addMessage(
-          response.data.reply,
-          "bot",
-          response.data.results ? response.data.results : undefined
-        );
+      if (response.data) {
+        if (response.data.results && Array.isArray(response.data.results)) {
+          // Case: Search Results found
+          addMessage(response.data.reply, "bot", response.data.results);
+        } else if (response.data.reply) {
+          // Case: Standard text reply
+          addMessage(response.data.reply, "bot");
+        }
       }
     } catch (error) {
       console.error("Chat Error:", error);
@@ -262,43 +248,44 @@ export function MarkAI() {
               className="h-[calc(100vh-200px)] overflow-y-auto bg-gray-50 px-3 py-3 sm:h-96 sm:px-4 sm:py-4"
             >
               <div className="flex flex-col gap-3">
-                {messages.map((message, index) => (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={`flex ${
-                      message.sender === "user"
-                        ? "justify-end"
-                        : "flex-col justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`max-w-[85%] rounded-lg px-3 py-2 text-sm sm:max-w-xs sm:px-4 ${
-                        message.sender === "user"
-                          ? "bg-vista-primary rounded-br-none text-white"
-                          : "rounded-bl-none bg-white text-gray-900 shadow-sm"
+                {messages
+                  .filter((m) => !m.isHidden) // <--- THIS IS THE KEY FIX FOR UI
+                  .map((message, index) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={`flex flex-col ${
+                        message.sender === "user" ? "items-end" : "items-start"
                       }`}
                     >
-                      {message.sender === "bot"
-                        ? parseMessageContent(message.text)
-                        : message.text.split("\n").map((line, i, arr) => (
-                            <span key={i}>
-                              {line}
-                              {i < arr.length - 1 && <br />}
-                            </span>
-                          ))}
-                    </div>
-
-                    {/* Property Cards Render Logic */}
-                    {message.properties && message.properties.length > 0 && (
-                      <div className="mt-2 w-full max-w-[90%] sm:max-w-sm">
-                        <PropertyCarousel properties={message.properties} />
+                      {/* The Text Bubble */}
+                      <div
+                        className={`max-w-[85%] rounded-lg px-3 py-2 text-sm sm:max-w-xs sm:px-4 ${
+                          message.sender === "user"
+                            ? "bg-vista-primary rounded-br-none text-white"
+                            : "rounded-bl-none bg-white text-gray-900 shadow-sm"
+                        }`}
+                      >
+                        {message.sender === "bot"
+                          ? parseMessageContent(message.text)
+                          : message.text.split("\n").map((line, i, arr) => (
+                              <span key={i}>
+                                {line}
+                                {i < arr.length - 1 && <br />}
+                              </span>
+                            ))}
                       </div>
-                    )}
-                  </motion.div>
-                ))}
+
+                      {/* Property Cards Render Logic */}
+                      {message.properties && message.properties.length > 0 && (
+                        <div className="mt-2 w-full max-w-[90%] sm:max-w-sm">
+                          <PropertyCarousel properties={message.properties} />
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
 
                 {/* Typing Indicator */}
                 {isTyping && (
