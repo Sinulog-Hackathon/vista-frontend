@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, MessageCircle } from "lucide-react";
+import { X, Send, Bot, Sparkles } from "lucide-react";
 import axios from "axios";
 import { useMarkAI } from "../../hooks/useMarkAI";
 import env from "../../utils/env";
@@ -230,14 +230,21 @@ export function MarkAI() {
               transition={{ delay: 0.1 }}
               className="bg-vista-primary flex items-center justify-between px-4 py-4 text-white"
             >
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
-                  <MessageCircle className="h-5 w-5" />
+              <div className="flex items-center gap-3">
+                <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 shadow-lg">
+                  <Bot className="h-6 w-6" />
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute -top-1 -right-1"
+                  >
+                    <Sparkles className="h-3 w-3 text-yellow-300" />
+                  </motion.div>
                 </div>
                 <div>
-                  <h3 className="font-semibold">Mark AI</h3>
-                  <p className="text-vista-bg/80 text-xs">
-                    Always here to help
+                  <h3 className="font-semibold tracking-wide">Mark AI</h3>
+                  <p className="text-white/70 text-xs">
+                    Vista's Real Estate Assistant
                   </p>
                 </div>
               </div>
@@ -397,8 +404,16 @@ export function MarkAI() {
                 animate={{ rotate: 0, opacity: 1 }}
                 exit={{ rotate: 180, opacity: 0 }}
                 transition={{ duration: 0.3 }}
+                className="relative"
               >
-                <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />
+                <Bot className="h-5 w-5 sm:h-6 sm:w-6" />
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="absolute -top-1 -right-1"
+                >
+                  <Sparkles className="h-2.5 w-2.5 text-yellow-300" />
+                </motion.div>
               </motion.div>
             ) : (
               <motion.div
@@ -423,7 +438,8 @@ export function MarkAI() {
               transition={{ duration: 0.2 }}
               className="pointer-events-none absolute right-0 bottom-16 hidden rounded-lg bg-gray-900 px-3 py-2 text-sm whitespace-nowrap text-white shadow-lg sm:block"
             >
-              Mark AI
+              <span className="font-semibold">Mark AI</span>
+              <span className="ml-1 text-gray-400">• Real Estate Assistant</span>
               <motion.div className="absolute right-4 -bottom-1 h-2 w-2 rotate-45 bg-gray-900" />
             </motion.div>
           )}
