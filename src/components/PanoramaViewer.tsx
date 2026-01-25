@@ -10,6 +10,7 @@ interface PanoramaViewerProps {
   onReady?: () => void;
   useDeviceOrientation?: boolean;
   vrMode?: boolean; // Enable side-by-side stereoscopic VR
+  stereo?: boolean; // Enable stereoscopic rendering (split-screen VR)
 }
 
 function PanoramaScene({ imageUrl, onTextureLoaded }: { imageUrl: string; onTextureLoaded?: () => void }) {
@@ -154,12 +155,11 @@ function DeviceOrientationController() {
     
     // For VR box in landscape mode (phone horizontal):
     // - alpha (compass) controls left/right head turns (yaw)
-    // - gamma controls up/down head nods (pitch) - when phone is horizontal
+    // - gamma controls up/down head nods (pitch) when phone is tilted
+    // When phone is held horizontally at eye level, gamma = 0, pitch should = 0 (looking at walls)
+    // Negate gamma: tilting phone up (negative gamma) = looking up (positive pitch)
     
-    // Use gamma for pitch (nodding up/down)
-    // Clamp to prevent flipping at extremes
-    // Add -0.3 offset to lower the eye level to natural human eye height
-    const pitch = THREE.MathUtils.clamp(-gammaRad - 0.3, -Math.PI / 3, Math.PI / 3);
+    const pitch = THREE.MathUtils.clamp(-gammaRad, -Math.PI / 3, Math.PI / 3);
     const yaw = alphaRad;
     const roll = 0; // Ignore roll for cleaner VR experience
     
@@ -171,13 +171,95 @@ function DeviceOrientationController() {
   return null;
 }
 
+function SyncedOrbitControls({ targetRef }: { targetRef?: React.MutableRefObject<THREE.Euler | null> }) {
+  const { camera } = useThree();
+  const controlsRef = useRef<any>(null);
+
+  useFrame(() => {
+    if (controlsRef.current && targetRef) {
+      targetRef.current = camera.rotation.clone();
+    }
+  });
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      enableZoom={true}
+      enablePan={false}
+      enableDamping={true}
+      dampingFactor={0.05}
+      autoRotate={false}
+      rotateSpeed={0.4}
+      zoomSpeed={1}
+    />
+  );
+}
+
+function SyncedCamera({ sharedRotation }: { sharedRotation: React.MutableRefObject<THREE.Euler | null> }) {
+  const { camera } = useThree();
+
+  useFrame(() => {
+    if (sharedRotation.current) {
+      camera.rotation.copy(sharedRotation.current);
+    }
+  });
+
+  return null;
+}
+
 export function PanoramaViewer({
   imageUrl,
   width = "100%",
   height = "100%",
   onReady,
   useDeviceOrientation = false,
+  stereo = false,
 }: PanoramaViewerProps) {
+  const sharedRotation = useRef<THREE.Euler | null>(null);
+
+  if (stereo) {
+    // Stereoscopic split-screen rendering for VR headsets
+    // Both eyes move together with shared rotation, only X position differs for IPD
+    return (
+      <div style={{ width, height, touchAction: "none", position: "relative", display: "flex", overflow: "hidden", backgroundColor: "black", gap: "8px" }}>
+        {/* Left Eye */}
+        <div style={{ flex: 1, height: "100%", position: "relative" }}>
+          <Canvas
+            camera={{ position: [-0.065, 0, 0.1], fov: 75 }}
+            style={{ width: "100%", height: "100%", display: "block" }}
+            gl={{ antialias: true }}
+          >
+            <PanoramaScene imageUrl={imageUrl} onTextureLoaded={onReady} />
+            {useDeviceOrientation ? (
+              <DeviceOrientationController />
+            ) : (
+              <SyncedOrbitControls targetRef={sharedRotation} />
+            )}
+            <Preload all />
+          </Canvas>
+        </div>
+
+        {/* Right Eye */}
+        <div style={{ flex: 1, height: "100%", position: "relative" }}>
+          <Canvas
+            camera={{ position: [0.065, 0, 0.1], fov: 75 }}
+            style={{ width: "100%", height: "100%", display: "block" }}
+            gl={{ antialias: true }}
+          >
+            <PanoramaScene imageUrl={imageUrl} onTextureLoaded={onReady} />
+            {useDeviceOrientation ? (
+              <DeviceOrientationController />
+            ) : (
+              <SyncedCamera sharedRotation={sharedRotation} />
+            )}
+            <Preload all />
+          </Canvas>
+        </div>
+      </div>
+    );
+  }
+
+  // Regular 360° mode
   return (
     <div style={{ width, height, touchAction: "none", position: "relative" }}>
       <Canvas

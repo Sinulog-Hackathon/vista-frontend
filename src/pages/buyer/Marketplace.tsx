@@ -488,7 +488,7 @@ export default function Marketplace() {
                         ref={(el) => {
                           scrollRefs.current[section.id] = el;
                         }}
-                        className="flex gap-4 overflow-hidden scroll-smooth pb-4 sm:gap-5 md:gap-6"
+                        className="flex gap-4 overflow-x-auto scroll-smooth pb-4 [scrollbar-width:none] sm:gap-5 md:gap-6 [&::-webkit-scrollbar]:hidden"
                       >
                         {sectionProperties[section.id].map((property) => (
                           <motion.div

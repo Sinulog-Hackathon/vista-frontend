@@ -141,6 +141,7 @@ export default function VRViewerPage() {
   const [typedCommand, setTypedCommand] = useState<string>("");
   const [showGalleryMenu, setShowGalleryMenu] = useState(false);
   const [showFurnitureMenu, setShowFurnitureMenu] = useState(false);
+  const [isStereoMode, setIsStereoMode] = useState(false);
   const [furnitureData, setFurnitureData] = useState<FurnitureApiResponse>();
   const [isFurnitureLoading, setIsFurnitureLoading] = useState(false);
   const [furnitureLoadingStep, setFurnitureLoadingStep] = useState(0);
@@ -906,6 +907,14 @@ export default function VRViewerPage() {
         <div
           className={`absolute ${isMobile ? "top-2 right-2" : "top-2 right-2"} z-30 flex gap-2`}
         >
+          {/* VR/360° Mode Toggle */}
+          <button
+            onClick={() => setIsStereoMode(!isStereoMode)}
+            className={`rounded-lg p-2 font-semibold text-black transition-all ${isStereoMode ? "bg-blue-500 hover:bg-blue-600" : "bg-vista-accent hover:opacity-90"}`}
+            title={isStereoMode ? "Switch to 360° Mode" : "Switch to VR Mode"}
+          >
+            {isStereoMode ? "VR" : "360°"}
+          </button>
           {/* Save Changes Button */}
           <button
             onClick={() => {
@@ -1329,7 +1338,7 @@ export default function VRViewerPage() {
       {panoramicImages.length > 0 && (
         <>
           <PanoramaViewer
-            key={`${stagedImageUrl || panoramicImages[currentImageIndex].url}-${currentImageIndex}`}
+            key={`${stagedImageUrl || panoramicImages[currentImageIndex].url}-${currentImageIndex}-${isStereoMode}`}
             imageUrl={stagedImageUrl || panoramicImages[currentImageIndex].url}
             width="100%"
             height="100%"
@@ -1337,6 +1346,7 @@ export default function VRViewerPage() {
               isMobileDevice() && orientationPermission === "granted"
             }
             vrMode={true}
+            stereo={isStereoMode}
           />
           {/* Loading Indicator */}
           {(isImagesLoading || isStagedImageLoading) && (
