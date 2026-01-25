@@ -10,12 +10,14 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { PropertyCardData } from "../../context/MarkAIContext";
+import { useMarkAI } from "../../hooks/useMarkAI";
 
 export function PropertyCarousel({
   properties,
 }: {
   properties: PropertyCardData[];
 }) {
+  const { setIsOpen } = useMarkAI();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
 
@@ -132,6 +134,7 @@ export function PropertyCarousel({
 
               <Link
                 to={`/buyer/property/${prop.propertyId}`}
+                onClick={() => setIsOpen(false)}
                 className="mt-3 flex items-center justify-center gap-1 rounded-lg bg-gray-50 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100"
               >
                 View Details <ChevronRight className="h-3 w-3" />
