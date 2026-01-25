@@ -32,9 +32,15 @@ import {
   Hospital,
   Bus,
   Briefcase,
+  Wand2,
 } from "lucide-react";
 import type { Property, PropertyImage } from "../../types/property";
 import { getProperty } from "../../services/propertyService";
+import { virtualStagingService } from "../../services/virtualStagingService";
+import {
+  getStagingSessionId,
+  storeStagingSession,
+} from "../../utils/stagingSessionStorage";
 
 // Header Component
 function PropertyHeader() {
@@ -67,7 +73,9 @@ function PropertyTitleSection({ property }: { property: Property }) {
           {property.listingType}
         </span>
         <span className="text-vista-text/40 text-xs">•</span>
-        <span className="text-vista-text/60 text-sm">{property.propertyType}</span>
+        <span className="text-vista-text/60 text-sm">
+          {property.propertyType}
+        </span>
       </div>
 
       <h1 className="text-vista-primary text-3xl leading-tight font-bold tracking-tight md:text-4xl">
@@ -100,7 +108,9 @@ function PropertyQuickStats({ property }: { property: Property }) {
         <div key={idx} className="flex items-center gap-3">
           <stat.icon className="text-vista-accent h-5 w-5" />
           <div>
-            <p className="text-vista-primary text-lg font-semibold">{stat.value}</p>
+            <p className="text-vista-primary text-lg font-semibold">
+              {stat.value}
+            </p>
             <p className="text-vista-text/50 text-xs">{stat.label}</p>
           </div>
         </div>
@@ -141,7 +151,10 @@ function PropertyDetails({ property }: { property: Property }) {
           { label: "Property Type", value: property.propertyType },
           { label: "Furnishing", value: property.furnishing || "Unfurnished" },
           { label: "Condition", value: property.condition || "N/A" },
-          { label: "Lot Area", value: property.lotArea ? `${property.lotArea}m²` : "N/A" },
+          {
+            label: "Lot Area",
+            value: property.lotArea ? `${property.lotArea}m²` : "N/A",
+          },
           { label: "Year Built", value: property.yearBuilt || "N/A" },
           { label: "Storeys", value: property.storeys || "N/A" },
         ].map((detail, idx) => (
@@ -150,7 +163,9 @@ function PropertyDetails({ property }: { property: Property }) {
             className="border-vista-text/5 flex items-center justify-between border-b py-2"
           >
             <span className="text-vista-text/50 text-sm">{detail.label}</span>
-            <span className="text-vista-primary text-sm font-medium">{detail.value}</span>
+            <span className="text-vista-primary text-sm font-medium">
+              {detail.value}
+            </span>
           </div>
         ))}
       </div>
@@ -178,7 +193,9 @@ function PropertyFeaturesAmenities({ property }: { property: Property }) {
       transition={{ duration: 0.5, delay: 0.3 }}
       className="shadow-vista-primary/5 space-y-6 rounded-2xl bg-white p-6 shadow-sm"
     >
-      <h2 className="text-vista-primary text-xl font-semibold">Features & Amenities</h2>
+      <h2 className="text-vista-primary text-xl font-semibold">
+        Features & Amenities
+      </h2>
 
       {property.amenities && property.amenities.length > 0 && (
         <div className="space-y-3">
@@ -310,17 +327,24 @@ function PropertyNearby({ property }: { property: Property }) {
       transition={{ duration: 0.5, delay: 0.35 }}
       className="shadow-vista-primary/5 space-y-6 rounded-2xl bg-white p-6 shadow-sm"
     >
-      <h2 className="text-vista-primary text-xl font-semibold">Nearby Establishments</h2>
+      <h2 className="text-vista-primary text-xl font-semibold">
+        Nearby Establishments
+      </h2>
       <div className="space-y-5">
         {nearbyCategories.map((category) => (
           <div key={category.key} className="flex items-start gap-3">
             <category.icon className="text-vista-accent mt-0.5 h-5 w-5 shrink-0" />
             <div className="flex-1">
-              <p className="text-vista-text/60 mb-1 text-sm">{category.label}</p>
+              <p className="text-vista-text/60 mb-1 text-sm">
+                {category.label}
+              </p>
               {category.data && category.data.length > 0 ? (
                 <div className="space-y-1">
                   {category.data.map((place, idx) => (
-                    <p key={idx} className="text-vista-primary text-sm font-medium">
+                    <p
+                      key={idx}
+                      className="text-vista-primary text-sm font-medium"
+                    >
                       {place.distance} - {place.name}
                     </p>
                   ))}
@@ -354,8 +378,10 @@ function PropertyFinancial({ property }: { property: Property }) {
       transition={{ duration: 0.5, delay: 0.4 }}
       className="shadow-vista-primary/5 space-y-6 rounded-2xl bg-white p-6 shadow-sm"
     >
-      <h2 className="text-vista-primary text-xl font-semibold">Legal & Financial</h2>
-      
+      <h2 className="text-vista-primary text-xl font-semibold">
+        Legal & Financial
+      </h2>
+
       <div className="grid gap-4 md:grid-cols-2">
         {property.ownershipStatus && (
           <div className="flex items-center gap-3">
@@ -364,7 +390,9 @@ function PropertyFinancial({ property }: { property: Property }) {
             </div>
             <div>
               <p className="text-vista-text/50 text-xs">Ownership Status</p>
-              <p className="text-vista-primary font-medium">{property.ownershipStatus}</p>
+              <p className="text-vista-primary font-medium">
+                {property.ownershipStatus}
+              </p>
             </div>
           </div>
         )}
@@ -376,7 +404,9 @@ function PropertyFinancial({ property }: { property: Property }) {
             </div>
             <div>
               <p className="text-vista-text/50 text-xs">Tax Status</p>
-              <p className="text-vista-primary font-medium">{property.taxStatus}</p>
+              <p className="text-vista-primary font-medium">
+                {property.taxStatus}
+              </p>
             </div>
           </div>
         )}
@@ -403,7 +433,10 @@ function PropertyFinancial({ property }: { property: Property }) {
           </p>
           <ul className="space-y-2">
             {property.terms.map((term, idx) => (
-              <li key={idx} className="text-vista-text/70 flex items-start gap-2 text-sm">
+              <li
+                key={idx}
+                className="text-vista-text/70 flex items-start gap-2 text-sm"
+              >
                 <Check className="text-vista-accent mt-0.5 h-4 w-4 shrink-0" />
                 {term}
               </li>
@@ -433,8 +466,10 @@ function PropertyAvailability({ property }: { property: Property }) {
       transition={{ duration: 0.5, delay: 0.45 }}
       className="shadow-vista-primary/5 space-y-6 rounded-2xl bg-white p-6 shadow-sm"
     >
-      <h2 className="text-vista-primary text-xl font-semibold">Availability & Policies</h2>
-      
+      <h2 className="text-vista-primary text-xl font-semibold">
+        Availability & Policies
+      </h2>
+
       <div className="grid gap-4 md:grid-cols-2">
         {property.availabilityDate && (
           <div className="flex items-center gap-3">
@@ -444,11 +479,14 @@ function PropertyAvailability({ property }: { property: Property }) {
             <div>
               <p className="text-vista-text/50 text-xs">Available From</p>
               <p className="text-vista-primary font-medium">
-                {new Date(property.availabilityDate).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+                {new Date(property.availabilityDate).toLocaleDateString(
+                  "en-US",
+                  {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  }
+                )}
               </p>
             </div>
           </div>
@@ -461,7 +499,9 @@ function PropertyAvailability({ property }: { property: Property }) {
             </div>
             <div>
               <p className="text-vista-text/50 text-xs">Minimum Lease</p>
-              <p className="text-vista-primary font-medium">{property.minimumLeasePeriod}</p>
+              <p className="text-vista-primary font-medium">
+                {property.minimumLeasePeriod}
+              </p>
             </div>
           </div>
         )}
@@ -473,7 +513,9 @@ function PropertyAvailability({ property }: { property: Property }) {
             </div>
             <div>
               <p className="text-vista-text/50 text-xs">Pet Policy</p>
-              <p className="text-vista-primary font-medium">{property.petPolicy}</p>
+              <p className="text-vista-primary font-medium">
+                {property.petPolicy}
+              </p>
             </div>
           </div>
         )}
@@ -485,7 +527,9 @@ function PropertyAvailability({ property }: { property: Property }) {
             </div>
             <div>
               <p className="text-vista-text/50 text-xs">Smoking Policy</p>
-              <p className="text-vista-primary font-medium">{property.smokingPolicy}</p>
+              <p className="text-vista-primary font-medium">
+                {property.smokingPolicy}
+              </p>
             </div>
           </div>
         )}
@@ -507,22 +551,30 @@ function PropertyDeveloper({ property }: { property: Property }) {
       transition={{ duration: 0.5, delay: 0.5 }}
       className="shadow-vista-primary/5 space-y-5 rounded-2xl bg-white p-6 shadow-sm"
     >
-      <h2 className="text-vista-primary text-xl font-semibold">Developer Information</h2>
-      
+      <h2 className="text-vista-primary text-xl font-semibold">
+        Developer Information
+      </h2>
+
       <div className="flex items-center gap-4">
         <div className="from-vista-primary to-vista-accent flex h-14 w-14 items-center justify-center rounded-xl bg-linear-to-br">
           <Building2 className="h-7 w-7 text-white" />
         </div>
         <div>
-          <h3 className="text-vista-primary text-lg font-semibold">{property.developerName}</h3>
+          <h3 className="text-vista-primary text-lg font-semibold">
+            {property.developerName}
+          </h3>
           {property.developerYears && (
-            <p className="text-vista-text/50 text-sm">{property.developerYears} years in business</p>
+            <p className="text-vista-text/50 text-sm">
+              {property.developerYears} years in business
+            </p>
           )}
         </div>
       </div>
 
       {property.developerBio && (
-        <p className="text-vista-text/70 text-sm leading-relaxed">{property.developerBio}</p>
+        <p className="text-vista-text/70 text-sm leading-relaxed">
+          {property.developerBio}
+        </p>
       )}
 
       <div className="flex flex-wrap gap-3">
@@ -606,7 +658,79 @@ function PriceCard({ property }: { property: Property }) {
 }
 
 // AI Staging Card Component
-function AIVirtualStagingCard({ property, navigate }: { property: Property; navigate: ReturnType<typeof useNavigate> }) {
+function AIVirtualStagingCard({
+  property,
+  navigate,
+  sessionStatus,
+  sessionError,
+  onGeneratingChange,
+}: {
+  property: Property;
+  navigate: ReturnType<typeof useNavigate>;
+  sessionStatus: "idle" | "creating" | "created" | "error";
+  sessionError: string | null;
+  onGeneratingChange: (isGenerating: boolean) => void;
+}) {
+  const [isLoadingSession, setIsLoadingSession] = useState(false);
+
+  const handleUseCurrentSession = async () => {
+    try {
+      setIsLoadingSession(true);
+      onGeneratingChange(true);
+      setIsLoadingSession(true);
+
+      // Get the stored session ID
+      const sessionId = getStagingSessionId(property.propertyId);
+      if (!sessionId) {
+        console.error("No session ID found");
+        return;
+      }
+
+      // Fetch the latest session data to get updated panoramic images
+      const sessionResponse = await virtualStagingService.getSession(sessionId);
+
+      // Extract panoramic images from the session
+      const panoramicImages = sessionResponse.session?.panoramic_images || [];
+
+      console.log("📸 Panoramic images from session:", panoramicImages);
+
+      // Navigate to VR viewer with panoramic images from session
+      navigate(`/vr-viewer/${property.propertyId}`, {
+        state: {
+          property,
+          startIndex: 0,
+          panoramicImagesFromSession: panoramicImages,
+        },
+      });
+    } catch (error) {
+      console.error("Error loading session data:", error);
+    } finally {
+      setIsLoadingSession(false);
+      onGeneratingChange(false);
+    }
+  };
+
+  const handleCreateNewSession = async () => {
+    try {
+      setIsLoadingSession(true);
+      onGeneratingChange(true);
+
+      // Navigate to VR viewer with flag to create new session
+      navigate(`/vr-viewer/${property.propertyId}`, {
+        state: {
+          property,
+          startIndex: 0,
+          createNewSession: true, // Signal to create new session in VR viewer
+        },
+      });
+    } catch (error) {
+      console.error("Error navigating to VR viewer:", error);
+    } finally {
+      setIsLoadingSession(false);
+      onGeneratingChange(false);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -621,18 +745,54 @@ function AIVirtualStagingCard({ property, navigate }: { property: Property; navi
           <h3 className="font-semibold">AI Virtual Staging</h3>
         </div>
         <p className="mb-4 text-sm leading-relaxed text-white/80">
-          Transform empty rooms into beautifully designed spaces with AI-powered staging.
+          Transform empty rooms into beautifully designed spaces with AI-powered
+          staging.
         </p>
-        <button
-          onClick={() =>
-            navigate(`/vr-viewer/${property.propertyId}`, {
-              state: { property, startIndex: 0 },
-            })
-          }
-          className="text-vista-primary w-full rounded-xl bg-white py-3 text-sm font-semibold transition-all hover:bg-white/90"
-        >
-          Try AI Staging
-        </button>
+
+        {/* Session Status */}
+        <div className="mb-4 rounded-lg bg-white/10 px-3 py-2 text-xs backdrop-blur-sm">
+          {sessionStatus === "creating" && (
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-white"></div>
+              <span>Preparing staging session...</span>
+            </div>
+          )}
+          {sessionStatus === "created" && (
+            <div className="flex items-center gap-2 text-green-200">
+              <Check className="h-4 w-4" />
+              <span>Session ready</span>
+            </div>
+          )}
+          {sessionStatus === "error" && (
+            <div className="flex flex-col gap-1">
+              <div className="text-red-200">
+                {sessionError || "Failed to prepare session"}
+              </div>
+            </div>
+          )}
+          {sessionStatus === "idle" && <span>Loading...</span>}
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
+          <button
+            onClick={handleUseCurrentSession}
+            disabled={sessionStatus !== "created" || isLoadingSession}
+            className="text-vista-primary flex-1 rounded-xl bg-white py-3 text-sm font-semibold transition-all hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isLoadingSession
+              ? "Loading..."
+              : sessionStatus === "creating"
+                ? "Preparing..."
+                : "Use Current Session"}
+          </button>
+          <button
+            onClick={handleCreateNewSession}
+            disabled={sessionStatus !== "created" || isLoadingSession}
+            className="flex-1 rounded-xl border border-white/30 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isLoadingSession ? "Loading..." : "Create New Session"}
+          </button>
+        </div>
       </div>
     </motion.div>
   );
@@ -649,15 +809,23 @@ function AgentCard({ property }: { property: Property }) {
       transition={{ duration: 0.5, delay: 0.3 }}
       className="shadow-vista-primary/5 rounded-2xl bg-white p-6 shadow-sm"
     >
-      <p className="text-vista-text/50 mb-4 text-xs tracking-wider uppercase">Listed by</p>
+      <p className="text-vista-text/50 mb-4 text-xs tracking-wider uppercase">
+        Listed by
+      </p>
       <div className="mb-5 flex items-center gap-4">
         <div className="from-vista-accent to-vista-primary flex h-12 w-12 items-center justify-center rounded-full bg-linear-to-br">
-          <span className="text-lg font-semibold text-white">{property.agentName.charAt(0)}</span>
+          <span className="text-lg font-semibold text-white">
+            {property.agentName.charAt(0)}
+          </span>
         </div>
         <div>
-          <h4 className="text-vista-primary font-semibold">{property.agentName}</h4>
+          <h4 className="text-vista-primary font-semibold">
+            {property.agentName}
+          </h4>
           <div className="mt-0.5 flex items-center gap-2">
-            <span className="text-vista-text/50 text-sm">Real Estate Agent</span>
+            <span className="text-vista-text/50 text-sm">
+              Real Estate Agent
+            </span>
             {property.agentExperience && (
               <>
                 <span className="text-vista-text/30">•</span>
@@ -917,16 +1085,6 @@ function PropertyImageGallery({
             <h3 className="text-vista-primary text-sm font-medium">
               Panoramic Views
             </h3>
-            <button
-              onClick={() =>
-                navigate(`/vr-viewer/${property.propertyId}`, {
-                  state: { property, startIndex: 0 },
-                })
-              }
-              className="text-vista-accent hover:text-vista-primary text-sm"
-            >
-              Open VR
-            </button>
           </div>
 
           <div className="flex gap-3 overflow-x-auto pb-2">
@@ -960,6 +1118,111 @@ function PropertyImageGallery({
     </div>
   );
 }
+
+// AI Staging Generation Modal
+function AIStagingGenerationModal({ isOpen }: { isOpen: boolean }) {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="from-vista-primary to-vista-accent relative w-full max-w-sm rounded-3xl bg-gradient-to-br p-8 text-center shadow-2xl"
+          >
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden rounded-3xl">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-white/10"
+              />
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-white/10"
+              />
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 space-y-6">
+              {/* Animated Magic Wand */}
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="flex justify-center"
+              >
+                <motion.div
+                  animate={{ rotate: [0, 20, -20, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="rounded-full bg-white/20 p-4 backdrop-blur-sm"
+                >
+                  <Wand2 className="h-8 w-8 text-white" />
+                </motion.div>
+              </motion.div>
+
+              {/* Text */}
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold text-white">
+                  Staging Your Space
+                </h2>
+                <p className="text-sm text-white/80">
+                  AI is transforming your room with beautiful furniture...
+                </p>
+              </div>
+
+              {/* Animated progress bar */}
+              <div className="space-y-2">
+                <div className="h-1 overflow-hidden rounded-full bg-white/20">
+                  <motion.div
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "100%" }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                    className="h-full w-1/3 rounded-full bg-white"
+                  />
+                </div>
+                <div className="flex items-center justify-center gap-1">
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 0.6, repeat: Infinity }}
+                    className="h-1.5 w-1.5 rounded-full bg-white"
+                  />
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                    className="h-1.5 w-1.5 rounded-full bg-white"
+                  />
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
+                    className="h-1.5 w-1.5 rounded-full bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Fun message */}
+              <p className="text-xs text-white/70 italic">
+                ✨ Creating magic, please wait...
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export default function BuyerPropertyDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -968,6 +1231,11 @@ export default function BuyerPropertyDetails() {
   const [error, setError] = useState<string | null>(null);
   const [isImageExpanded, setIsImageExpanded] = useState(false);
   const [expandedImageIndex, setExpandedImageIndex] = useState(0);
+  const [sessionStatus, setSessionStatus] = useState<
+    "idle" | "creating" | "created" | "error"
+  >("idle");
+  const [sessionError, setSessionError] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   useEffect(() => {
     window.scrollTo(0, 0);
     const fetchProperty = async () => {
@@ -989,6 +1257,53 @@ export default function BuyerPropertyDetails() {
     };
     fetchProperty();
   }, [id]);
+
+  // Initialize virtual staging session when property loads
+  useEffect(() => {
+    if (!property) return;
+
+    const initializeStagingSession = async () => {
+      try {
+        setSessionStatus("creating");
+        setSessionError(null);
+
+        // Check if session already exists in localStorage
+        const existingSessionId = getStagingSessionId(property.propertyId);
+
+        if (existingSessionId) {
+          // Session exists, verify it's still valid
+          try {
+            await virtualStagingService.getSession(existingSessionId);
+            console.log("✅ Existing staging session is valid");
+            setSessionStatus("created");
+            return;
+          } catch (error) {
+            console.warn("⚠️ Stored session invalid, creating new one");
+          }
+        }
+
+        // Create new session
+        const response = await virtualStagingService.createSession({
+          property_id: property.propertyId,
+          user_id: "guest",
+          room_name: "Main Room",
+        });
+
+        storeStagingSession(property.propertyId, response.session_id);
+        console.log(
+          "✅ Created and stored staging session:",
+          response.session_id
+        );
+        setSessionStatus("created");
+      } catch (error: any) {
+        console.error("Failed to initialize staging session:", error);
+        setSessionStatus("error");
+        setSessionError(error.message || "Failed to create session");
+      }
+    };
+
+    initializeStagingSession();
+  }, [property?.propertyId]);
 
   const allImages: PropertyImage[] = property?.images || [];
   if (loading) {
@@ -1075,6 +1390,9 @@ export default function BuyerPropertyDetails() {
   }
   return (
     <div className="bg-vista-bg min-h-screen">
+      {/* AI Staging Generation Modal */}
+      <AIStagingGenerationModal isOpen={isGenerating} />
+
       <AnimatePresence>
         {isImageExpanded && (
           <ImageGalleryModal
@@ -1123,7 +1441,13 @@ export default function BuyerPropertyDetails() {
           <div className="lg:col-span-5">
             <div className="sticky top-20 space-y-5">
               <PriceCard property={property} />
-              <AIVirtualStagingCard property={property} navigate={navigate} />
+              <AIVirtualStagingCard
+                property={property}
+                navigate={navigate}
+                sessionStatus={sessionStatus}
+                sessionError={sessionError}
+                onGeneratingChange={setIsGenerating}
+              />
               <AgentCard property={property} />
             </div>
           </div>
@@ -1132,4 +1456,3 @@ export default function BuyerPropertyDetails() {
     </div>
   );
 }
-       
