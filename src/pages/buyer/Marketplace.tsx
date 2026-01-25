@@ -19,6 +19,7 @@ import {
 import { PropertyCard } from "../../features/buyer/components/PropertyCard";
 import type { PropertyCardPayload } from "../../features/buyer/types/property.types";
 import { getBuyerPropertiesView } from "../../services/propertyService";
+import vistaLogo from "../../assets/Vista (3).png";
 
 type QuickFilterType =
   | "popular"
@@ -265,9 +266,8 @@ export default function Marketplace() {
         <div className="mx-auto flex items-center justify-between gap-2 px-3 sm:gap-4 sm:px-4 md:px-8">
           {/* Logo */}
           <div className="flex shrink-0 items-center">
-            <h1 className="text-vista-primary font-display text-lg font-bold sm:text-xl">
-              Vista.Buyer
-            </h1>
+            <img src={vistaLogo} className="h-12" alt="Vista Logo" />
+            <h1 className="text-vista-primary font-display text-lg font-bold sm:text-xl"></h1>
           </div>
 
           {/* Search Bar - Hidden on mobile, shown on md+ */}
