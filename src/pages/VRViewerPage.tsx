@@ -141,6 +141,7 @@ export default function VRViewerPage() {
   const [typedCommand, setTypedCommand] = useState<string>("");
   const [showGalleryMenu, setShowGalleryMenu] = useState(false);
   const [showFurnitureMenu, setShowFurnitureMenu] = useState(false);
+  const [isStereoMode, setIsStereoMode] = useState(false);
   const [furnitureData, setFurnitureData] = useState<FurnitureApiResponse>();
   const [isFurnitureLoading, setIsFurnitureLoading] = useState(false);
   const [furnitureLoadingStep, setFurnitureLoadingStep] = useState(0);
@@ -754,7 +755,7 @@ export default function VRViewerPage() {
       {/** Decide active state before JSX to reduce duplication */}
 
       {/* Budget Input - First step */}
-      {!isMobile && setupStep === "budget" && (
+      {setupStep === "budget" && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-8 text-white">
           <h2 className="mb-2 text-center text-3xl font-bold">
             Set Your Budget
@@ -847,7 +848,7 @@ export default function VRViewerPage() {
       )}
 
       {/* Input Mode Selection - Second step (desktop only) */}
-      {!isMobile && setupStep === "input-mode" && inputMode === null && (
+      {setupStep === "input-mode" && inputMode === null && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/95 p-8 text-white">
           <div className="bg-vista-accent/20 mb-4 rounded-full px-4 py-2">
             <span className="text-vista-accent text-sm font-medium">
@@ -906,6 +907,14 @@ export default function VRViewerPage() {
         <div
           className={`absolute ${isMobile ? "top-2 right-2" : "top-2 right-2"} z-30 flex gap-2`}
         >
+          {/* VR/360° Mode Toggle */}
+          <button
+            onClick={() => setIsStereoMode(!isStereoMode)}
+            className={`rounded-lg p-2 font-semibold text-black transition-all ${isStereoMode ? "bg-blue-500 hover:bg-blue-600" : "bg-vista-accent hover:opacity-90"}`}
+            title={isStereoMode ? "Switch to 360° Mode" : "Switch to VR Mode"}
+          >
+            {isStereoMode ? "VR" : "360°"}
+          </button>
           {/* Save Changes Button */}
           <button
             onClick={() => {
@@ -1264,7 +1273,8 @@ export default function VRViewerPage() {
       {browserSupportsSpeechRecognition &&
         inputMode === "voice" &&
         !voiceActive &&
-        (!isMobile || (orientationPermission === "granted" && !isPortrait)) && (
+        orientationPermission === "granted" &&
+        !isPortrait && (
           <div className="pointer-events-auto absolute bottom-32 left-1/2 z-50 -translate-x-1/2">
             <button
               className="bg-vista-accent cursor-pointer rounded-full px-5 py-2 font-medium text-black shadow hover:opacity-90 active:opacity-80"
@@ -1328,7 +1338,7 @@ export default function VRViewerPage() {
       {panoramicImages.length > 0 && (
         <>
           <PanoramaViewer
-            key={`${stagedImageUrl || panoramicImages[currentImageIndex].url}-${currentImageIndex}`}
+            key={`${stagedImageUrl || panoramicImages[currentImageIndex].url}-${currentImageIndex}-${isStereoMode}`}
             imageUrl={stagedImageUrl || panoramicImages[currentImageIndex].url}
             width="100%"
             height="100%"
@@ -1336,6 +1346,7 @@ export default function VRViewerPage() {
               isMobileDevice() && orientationPermission === "granted"
             }
             vrMode={true}
+            stereo={isStereoMode}
           />
           {/* Loading Indicator */}
           {(isImagesLoading || isStagedImageLoading) && (
